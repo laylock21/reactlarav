@@ -24,7 +24,7 @@ export default function Dashboard() {
             </div>
         </>
     );
-}
+}   
 
 Dashboard.layout = {
     breadcrumbs: [

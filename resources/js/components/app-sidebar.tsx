@@ -1,5 +1,19 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import { dashboard, products } from "@/routes";
+import { Link } from "@inertiajs/react";
+import {
+    BookOpen,
+    FolderGit2,
+    LayoutGrid,
+    Package,
+    Tags,
+    ArrowDownToLine,
+    ArrowUpFromLine,
+    Users,
+    Truck,
+    ChartColumn,
+    Settings,
+} from 'lucide-react';
+
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -13,29 +27,57 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: "Dashboard",
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: "Products",
+        href: "/products",
+        icon: Package,
+    },
+    {
+        title: "Categories",
+        href: "/categories",
+        icon: Tags,
+    },
+    {
+        title: "Stock In",
+        href: "/stock-in",
+        icon: ArrowDownToLine,
+    },
+    {
+        title: "Stock Out",
+        href: "/stock-out",
+        icon: ArrowUpFromLine,
+    },
+    {
+        title: "Users",
+        href: "/users",
+        icon: Users,
+    },
+    {
+        title: "Suppliers",
+        href: "/suppliers",
+        icon: Truck,
+    },
+    {
+        title: "Analytics",
+        href: "/analytics",
+        icon: ChartColumn,
+    },
+    {
+        title: "Settings",
+        href: "/settings",
+        icon: Settings,
+    },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     return (
