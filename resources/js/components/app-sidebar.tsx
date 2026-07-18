@@ -1,3 +1,4 @@
+import { useSidebar } from "@/components/ui/sidebar";
 import { dashboard, products } from "@/routes";
 import { Link } from "@inertiajs/react";
 import {
@@ -26,6 +27,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarTrigger,
 } from '@/components/ui/sidebar';
 import type { NavItem } from '@/types';
 
@@ -79,19 +81,34 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [];
 
+
 export function AppSidebar() {
+    const { state, toggleSidebar } = useSidebar();
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
-                                <AppLogo />
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
+                <div className="flex items-center justify-between px-2">
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton size="lg" asChild>
+                                {state === "collapsed" ? (
+                                    <button
+                                        onClick={toggleSidebar}
+                                        className="flex w-full items-center justify-center"
+                                    >
+                                        <AppLogo />
+                                    </button>
+                                ) : (
+                                    <Link href={dashboard()} prefetch>
+                                        <AppLogo />
+                                    </Link>
+                                )}
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+
+                    <SidebarTrigger />
+                </div>
             </SidebarHeader>
 
             <SidebarContent>
