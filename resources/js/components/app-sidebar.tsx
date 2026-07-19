@@ -1,9 +1,9 @@
+import AppLogo from "@/components/app-logo";
+import AppLogoIcon from "@/components/app-logo-icon";
 import { useSidebar } from "@/components/ui/sidebar";
 import { dashboard, products } from "@/routes";
 import { Link } from "@inertiajs/react";
 import {
-    BookOpen,
-    FolderGit2,
     LayoutGrid,
     Package,
     Tags,
@@ -15,7 +15,6 @@ import {
     Settings,
 } from 'lucide-react';
 
-import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -85,29 +84,33 @@ const footerNavItems: NavItem[] = [];
 export function AppSidebar() {
     const { state, toggleSidebar } = useSidebar();
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="sidebar">
             <SidebarHeader>
                 <div className="flex items-center justify-between px-2">
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton size="lg" asChild>
-                                {state === "collapsed" ? (
-                                    <button
-                                        onClick={toggleSidebar}
-                                        className="flex w-full items-center justify-center"
-                                    >
-                                        <AppLogo />
-                                    </button>
-                                ) : (
-                                    <Link href={dashboard()} prefetch>
-                                        <AppLogo />
-                                    </Link>
-                                )}
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
 
-                    <SidebarTrigger />
+                    {state === "expanded" ? (
+                        <>
+                            <SidebarMenu className="flex-1">
+                                <SidebarMenuItem>
+                                    <SidebarMenuButton size="lg" asChild>
+                                        <Link href={dashboard()} prefetch>
+                                            <AppLogo />
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            </SidebarMenu>
+
+                            <SidebarTrigger />
+                        </>
+                    ) : (
+                        <button
+                            onClick={toggleSidebar}
+                            className="flex h-10 w-full items-center justify-center rounded-md hover:bg-sidebar-accent"
+                        >
+                            <AppLogoIcon className="h-6 w-6" />
+                        </button>
+                    )}
+
                 </div>
             </SidebarHeader>
 
