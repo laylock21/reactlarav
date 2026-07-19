@@ -14,13 +14,17 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+
 import {
-    ArrowUpDown,
+    Search,
+    Filter,
+    Upload,
     Trash2,
     CheckSquare,
     Plus,
+    MoreHorizontal,
+    Pencil,
 } from "lucide-react";
-import { Upload } from "lucide-react";
 
 import {
     DropdownMenu,
@@ -28,6 +32,45 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+
+const products = [
+    {
+        id: 1,
+        sku: "P001",
+        name: "Logitech G102",
+        supplier: "Logitech",
+        category: "Mouse",
+        stock: 45,
+        price: 895,
+        status: "Delivered",
+        ordered: "2026-07-18"
+    },
+    {
+        id: 2,
+        sku: "P002",
+        name: "Royal Kludge RK61",
+        supplier: "Royal Kludge",
+        category: "Keyboard",
+        stock: 18,
+        price: 2395,
+        status: "Pending",
+        ordered: "2026-07-20",
+    },
+    {
+        id: 3,
+        sku: "P003",
+        name: "AOC 24G2",
+        supplier: "AOC",
+        category: "Monitor",
+        stock: 7,
+        price: 8995,
+        status: "Delivered",
+        ordered: "2026-07-22",
+    },
+];
 export default function Products() {
     return (
         <>
@@ -49,14 +92,18 @@ export default function Products() {
                 </div>
                 <Card>
 
-                    <CardHeader>
+                    <CardHeader className="px-6 py-5">
                         <div className="flex items-center justify-between gap-4">
 
                             {/* Left Side */}
-                            <Input
-                                placeholder="Search products..."
-                                className="max-w-sm"
-                            />
+                            <div className="relative max-w-sm w-full">
+                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+                                <Input
+                                    placeholder="Search products..."
+                                    className="pl-9"
+                                />
+                            </div>
 
                             {/* Right Side */}
                             <div className="flex items-center gap-2">
@@ -65,17 +112,25 @@ export default function Products() {
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="outline" size="icon">
-                                            <ArrowUpDown className="h-4 w-4" />
+                                            <Filter className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
 
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => alert("Ascending")}>
-                                            Ascending
+                                        <DropdownMenuItem>
+                                            All Products
+                                        </DropdownMenuItem>
+        
+                                        <DropdownMenuItem>
+                                            Delivered
                                         </DropdownMenuItem>
 
-                                        <DropdownMenuItem onClick={() => alert("Descending")}>
-                                            Descending
+                                        <DropdownMenuItem>
+                                            Pending
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem>
+                                            Low Stock
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -106,16 +161,7 @@ export default function Products() {
                                     onClick={() => alert("Delete")}
                                 >
                                     <Trash2 className="h-4 w-4" />
-                                </Button>
-
-                                {/* Select All */}
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => alert("Select All")}
-                                >
-                                    <CheckSquare className="h-4 w-4" />
-                                </Button>
+                                </Button>   
 
                                 {/* Add Product */}
                                 <Button
@@ -129,13 +175,116 @@ export default function Products() {
                         </div>
                     </CardHeader>
 
-                    <CardContent>
+                    <CardContent className="px-8 pb-6 overflow-x-auto">
 
                         <Table>
 
-                            <TableHeader />
+                            <TableHeader className="sticky top-0 bg-background z-10">
+                                <TableRow className="border-b last:border-0">
 
-                            <TableBody />
+                                    <TableHead className="w-12">
+                                        <Checkbox />
+                                    </TableHead>
+
+                                    <TableHead className="w-12"></TableHead>
+
+                                    <TableHead>SKU</TableHead>
+
+                                    <TableHead>Supplier</TableHead>
+        
+                                    <TableHead>Product</TableHead>
+
+                                    <TableHead>Category</TableHead>
+
+                                    <TableHead>Stock</TableHead>
+
+                                    <TableHead>Status</TableHead>
+
+                                    <TableHead>Ordered</TableHead>
+
+                                    <TableHead className="text-right">
+                                        Price
+                                    </TableHead>
+
+
+                                </TableRow>
+                            </TableHeader>
+
+                            <TableBody>
+
+                                {products.map((product) => (
+
+                                    <TableRow
+                                        key={product.id}
+                                        className="border-b border-slate-200 dark:border-slate-800"
+                                    >
+                                        
+                                        <TableCell>
+                                            <Checkbox />
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                    >
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+
+                                                <DropdownMenuContent align="start">
+                                                    <DropdownMenuItem>
+                                                        <Pencil className="mr-2 h-4 w-4" />
+                                                        Edit
+                                                    </DropdownMenuItem>
+
+                                                    <DropdownMenuItem className="text-red-600">
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+
+                                        <TableCell>{product.sku}</TableCell>
+
+                                        <TableCell>{product.supplier}</TableCell>
+
+                                        <TableCell className="font-medium">
+                                            {product.name}
+                                        </TableCell>
+
+                                        <TableCell>{product.category}</TableCell>
+
+                                        <TableCell>{product.stock}</TableCell>
+
+                                        <TableCell>
+                                            <Badge
+                                                className={
+                                                    product.status === "Delivered"
+                                                        ? "bg-green-600"
+                                                        : product.status === "Pending"
+                                                        ? "bg-yellow-500"
+                                                        : "bg-blue-500"
+                                                }
+                                            >
+                                                {product.status}
+                                            </Badge>
+                                        </TableCell>
+
+                                        <TableCell>{product.ordered}</TableCell>
+
+                                        <TableCell className="text-right">
+                                            ₱{product.price.toLocaleString()}
+                                        </TableCell>
+
+                                    </TableRow>
+
+                                ))}
+
+                            </TableBody>
 
                         </Table>
 
