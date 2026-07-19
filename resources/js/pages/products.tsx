@@ -1,6 +1,33 @@
 import { Head } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardHeader,
+    CardContent,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    ArrowUpDown,
+    Trash2,
+    CheckSquare,
+    Plus,
+} from "lucide-react";
+import { Upload } from "lucide-react";
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 export default function Products() {
     return (
         <>
@@ -19,53 +46,102 @@ export default function Products() {
                             Manage all inventory products.
                         </p>
                     </div>
-
-                    <button>
-                        + Add Product
-                    </button>
-
                 </div>
-                <div className="flex gap-4">
+                <Card>
 
-                        <Input placeholder="Search products..." />
+                    <CardHeader>
+                        <div className="flex items-center justify-between gap-4">
 
-                </div>
-                <div className="rounded-xl border">
-                    <table className="w-full">
+                            {/* Left Side */}
+                            <Input
+                                placeholder="Search products..."
+                                className="max-w-sm"
+                            />
 
-                        <thead>
+                            {/* Right Side */}
+                            <div className="flex items-center gap-2">
 
-                            <tr className="border-b">
+                                {/* Sort */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" size="icon">
+                                            <ArrowUpDown className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
 
-                                <th className="p-4 text-left">SKU</th>
-                                <th className="p-4 text-left">Product</th>
-                                <th className="p-4 text-left">Category</th>
-                                <th className="p-4 text-left">Stock</th>
-                                <th className="p-4 text-left">Price</th>
-                                <th className="p-4 text-left">Actions</th>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => alert("Ascending")}>
+                                            Ascending
+                                        </DropdownMenuItem>
 
-                            </tr>
+                                        <DropdownMenuItem onClick={() => alert("Descending")}>
+                                            Descending
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
 
-                        </thead>
+                                {/* Import */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" size="icon">
+                                            <Upload className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
 
-                        <tbody>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => alert("CSV")}>
+                                            CSV
+                                        </DropdownMenuItem>
 
-                            <tr>
+                                        <DropdownMenuItem onClick={() => alert("PDF")}>
+                                            PDF
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
 
-                                <td className="p-4">P001</td>
-                                <td className="p-4">Mouse</td>
-                                <td className="p-4">Peripherals</td>
-                                <td className="p-4">50</td>
-                                <td className="p-4">₱450</td>
-                                <td className="p-4">✏️ 🗑️</td>
+                                {/* Delete */}
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => alert("Delete")}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
 
-                            </tr>
+                                {/* Select All */}
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => alert("Select All")}
+                                >
+                                    <CheckSquare className="h-4 w-4" />
+                                </Button>
 
-                        </tbody>
+                                {/* Add Product */}
+                                <Button
+                                    size="icon"
+                                    onClick={() => alert("Add Product")}
+                                >
+                                    <Plus className="h-4 w-4" />
+                                </Button>
 
-                    </table>
+                            </div>
+                        </div>
+                    </CardHeader>
 
-                </div>
+                    <CardContent>
+
+                        <Table>
+
+                            <TableHeader />
+
+                            <TableBody />
+
+                        </Table>
+
+                    </CardContent>
+
+                </Card>
             </div>
         </>
     );
