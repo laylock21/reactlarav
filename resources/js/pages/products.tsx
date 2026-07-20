@@ -15,6 +15,9 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
+import { ProductDialog } from "@/components/product-dialog";
+import { useState } from "react";
+
 import {
     Search,
     Filter,
@@ -22,8 +25,13 @@ import {
     Trash2,
     CheckSquare,
     Plus,
-    MoreHorizontal,
+    MoreVertical,
     Pencil,
+    Eye,
+    Copy,
+    Package,
+    Archive,
+    BadgeCheck,
 } from "lucide-react";
 
 import {
@@ -31,9 +39,9 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 const products = [
@@ -71,7 +79,22 @@ const products = [
         ordered: "2026-07-22",
     },
 ];
+
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case "Delivered":
+            return "bg-green-600";
+        case "Pending":
+            return "bg-yellow-500";
+        case "In Transit":
+            return "bg-blue-600";
+        default:
+            return "bg-gray-500";
+    }
+};
 export default function Products() {
+
+    const [open, setOpen] = useState(false);
     return (
         <>
             <Head title="Products" />
@@ -166,7 +189,7 @@ export default function Products() {
                                 {/* Add Product */}
                                 <Button
                                     size="icon"
-                                    onClick={() => alert("Add Product")}
+                                    onClick={() => setOpen(true)}
                                 >
                                     <Plus className="h-4 w-4" />
                                 </Button>
@@ -225,26 +248,63 @@ export default function Products() {
 
                                         <TableCell>
                                             <DropdownMenu>
+
                                                 <DropdownMenuTrigger asChild>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
                                                     >
-                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <MoreVertical className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
 
-                                                <DropdownMenuContent align="start">
-                                                    <DropdownMenuItem>
-                                                        <Pencil className="mr-2 h-4 w-4" />
-                                                        Edit
-                                                    </DropdownMenuItem>
+                                                <DropdownMenuContent
+                                                    align="start"
+                                                    sideOffset={8}
+                                                    className="w-56"
+                                                >
 
-                                                    <DropdownMenuItem className="text-red-600">
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
+                                                <DropdownMenuItem>
+                                                    <Eye className="mr-2 h-4 w-4" />
+                                                    View Details
+                                                </DropdownMenuItem>
+
+                                                <DropdownMenuItem>
+                                                    <Pencil className="mr-2 h-4 w-4" />
+                                                    Edit Product
+                                                </DropdownMenuItem>
+
+                                                <DropdownMenuItem>
+                                                    <Package className="mr-2 h-4 w-4" />
+                                                    Stock Movement
+                                                </DropdownMenuItem>
+
+                                                <DropdownMenuItem>
+                                                    <Copy className="mr-2 h-4 w-4" />
+                                                    Duplicate
+                                                </DropdownMenuItem>
+
+                                                <DropdownMenuSeparator />
+
+                                                <DropdownMenuItem>
+                                                    <BadgeCheck className="mr-2 h-4 w-4" />
+                                                    Change Status
+                                                </DropdownMenuItem>
+
+                                                <DropdownMenuSeparator />
+
+                                                <DropdownMenuItem>
+                                                    <Archive className="mr-2 h-4 w-4" />
+                                                    Archive
+                                                </DropdownMenuItem>
+
+                                                <DropdownMenuItem className="text-red-600">
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    Delete
+                                                </DropdownMenuItem>
+
+                                            </DropdownMenuContent>
+
                                             </DropdownMenu>
                                         </TableCell>
 
@@ -261,17 +321,9 @@ export default function Products() {
                                         <TableCell>{product.stock}</TableCell>
 
                                         <TableCell>
-                                            <Badge
-                                                className={
-                                                    product.status === "Delivered"
-                                                        ? "bg-green-600"
-                                                        : product.status === "Pending"
-                                                        ? "bg-yellow-500"
-                                                        : "bg-blue-500"
-                                                }
-                                            >
-                                                {product.status}
-                                            </Badge>
+                                        <Badge className={getStatusColor(product.status)}>
+                                            {product.status}
+                                        </Badge>
                                         </TableCell>
 
                                         <TableCell>{product.ordered}</TableCell>
@@ -292,6 +344,10 @@ export default function Products() {
 
                 </Card>
             </div>
+            <ProductDialog
+                open={open}
+                onOpenChange={setOpen}
+            />
         </>
     );
 }
