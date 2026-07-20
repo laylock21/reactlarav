@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/table";
 
 import { ProductDialog } from "@/components/product-dialog";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+export default function Products({ products }: Props)
 
 import {
     Search,
@@ -44,42 +45,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 
-const products = [
-    {
-        id: 1,
-        sku: "P001",
-        name: "Logitech G102",
-        supplier: "Logitech",
-        category: "Mouse",
-        stock: 45,
-        price: 895,
-        status: "Delivered",
-        ordered: "2026-07-18"
-    },
-    {
-        id: 2,
-        sku: "P002",
-        name: "Royal Kludge RK61",
-        supplier: "Royal Kludge",
-        category: "Keyboard",
-        stock: 18,
-        price: 2395,
-        status: "Pending",
-        ordered: "2026-07-20",
-    },
-    {
-        id: 3,
-        sku: "P003",
-        name: "AOC 24G2",
-        supplier: "AOC",
-        category: "Monitor",
-        stock: 7,
-        price: 8995,
-        status: "Delivered",
-        ordered: "2026-07-22",
-    },
-];
-
 const getStatusColor = (status: string) => {
     switch (status) {
         case "Delivered":
@@ -92,9 +57,65 @@ const getStatusColor = (status: string) => {
             return "bg-gray-500";
     }
 };
-export default function Products() {
+
+
+type Product = {
+    id: number;
+    sku: string;
+    barcode: string | null;
+    name: string;
+    supplier: string;
+    category: string;
+    unit: string;
+    quantity: number;
+    minimum_stock: number;
+    cost_price: number;
+    selling_price: number;
+    status: string;
+    description: string | null;
+    created_at: string;
+};
+
+type Props = {
+    products: {
+        data: Product[];
+    };
+};
+{
+    const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState<
+        "all" | "Delivered" | "Pending" | "Low Stock"
+    >("all");
+
+    const [selectedRows, setSelectedRows] = useState<number[]>([]);
+
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const [open, setOpen] = useState(false);
+    const filteredProducts = useMemo(() => {
+        let data = [...products.data];
+        // Search
+        data = data.filter(product =>
+            product.name.toLowerCase().includes(search.toLowerCase()) ||
+            product.sku.toLowerCase().includes(search.toLowerCase()) ||
+            product.supplier.toLowerCase().includes(search.toLowerCase())
+        );
+
+        // Status filter
+        if (statusFilter === "Delivered") {
+            data = data.filter(product => product.status === "Delivered");
+        }
+
+        if (statusFilter === "Pending") {
+            data = data.filter(product => product.status === "Pending");
+        }
+
+        if (statusFilter === "Low Stock") {
+            data = data.filter(product => product.quantity <= 10);
+        }
+
+        return data;
+    }, [search, statusFilter]);
     return (
         <>
             <Head title="Products" />
@@ -125,13 +146,15 @@ export default function Products() {
                                 <Input
                                     placeholder="Search products..."
                                     className="pl-9"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
 
                             {/* Right Side */}
                             <div className="flex items-center gap-2">
 
-                                {/* Sort */}
+                                {/* Filter */}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="outline" size="icon">
@@ -140,19 +163,19 @@ export default function Products() {
                                     </DropdownMenuTrigger>
 
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setStatusFilter("all")}>
                                             All Products
                                         </DropdownMenuItem>
-        
-                                        <DropdownMenuItem>
+
+                                        <DropdownMenuItem onClick={() => setStatusFilter("Delivered")}>
                                             Delivered
                                         </DropdownMenuItem>
 
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setStatusFilter("Pending")}>
                                             Pending
                                         </DropdownMenuItem>
 
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setStatusFilter("Low Stock")}>
                                             Low Stock
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
@@ -167,11 +190,15 @@ export default function Products() {
                                     </DropdownMenuTrigger>
 
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => alert("CSV")}>
+                                        <DropdownMenuItem
+                                            onClick={() => console.log("Export CSV")}
+                                        >
                                             CSV
                                         </DropdownMenuItem>
 
-                                        <DropdownMenuItem onClick={() => alert("PDF")}>
+                                        <DropdownMenuItem
+                                            onClick={() => console.log("Export PDF")}
+                                        >
                                             PDF
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
@@ -181,7 +208,11 @@ export default function Products() {
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    onClick={() => alert("Delete")}
+                                    onClick={() => {
+                                        alert(
+                                            `Delete ${selectedRows.length} selected products`
+                                        );
+                                    }}
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>   
@@ -205,9 +236,20 @@ export default function Products() {
                             <TableHeader className="sticky top-0 bg-background z-10">
                                 <TableRow className="border-b last:border-0">
 
-                                    <TableHead className="w-12">
-                                        <Checkbox />
-                                    </TableHead>
+                                    <TableCell>
+                                        <Checkbox
+                                            checked={selectedRows.includes(product.id)}
+                                            onCheckedChange={(checked) => {
+                                                if (checked) {
+                                                    setSelectedRows([...selectedRows, product.id]);
+                                                } else {
+                                                    setSelectedRows(
+                                                        selectedRows.filter((id) => id !== product.id)
+                                                    );
+                                                }
+                                            }}
+                                        />
+                                    </TableCell>
 
                                     <TableHead className="w-12"></TableHead>
 
@@ -235,7 +277,7 @@ export default function Products() {
 
                             <TableBody>
 
-                                {products.map((product) => (
+                                {filteredProducts.map((product) => (
 
                                     <TableRow
                                         key={product.id}
@@ -243,7 +285,24 @@ export default function Products() {
                                     >
                                         
                                         <TableCell>
-                                            <Checkbox />
+                                            <Checkbox
+                                                checked={selectedRows.includes(product.id)}
+                                                onCheckedChange={(checked) => {
+
+                                                    if (checked) {
+
+                                                        setSelectedRows([...selectedRows, product.id]);
+
+                                                    } else {
+
+                                                        setSelectedRows(
+                                                            selectedRows.filter(id => id !== product.id)
+                                                        );
+
+                                                    }
+
+                                                }}
+                                            />
                                         </TableCell>
 
                                         <TableCell>
@@ -318,7 +377,7 @@ export default function Products() {
 
                                         <TableCell>{product.category}</TableCell>
 
-                                        <TableCell>{product.stock}</TableCell>
+                                        <TableCell>{product.quantity}</TableCell>
 
                                         <TableCell>
                                         <Badge className={getStatusColor(product.status)}>
@@ -326,10 +385,10 @@ export default function Products() {
                                         </Badge>
                                         </TableCell>
 
-                                        <TableCell>{product.ordered}</TableCell>
+                                        <TableCell>{new Date(product.created_at).toLocaleDateString()}</TableCell>
 
                                         <TableCell className="text-right">
-                                            ₱{product.price.toLocaleString()}
+                                            ₱{Number(product.selling_price).toLocaleString()}
                                         </TableCell>
 
                                     </TableRow>

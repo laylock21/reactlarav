@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ProductForm } from "./product-form";
 
 type ProductDialogProps = {
     open: boolean;
@@ -21,7 +22,7 @@ export function ProductDialog({
 }: ProductDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
 
                 <DialogHeader>
 
@@ -30,57 +31,16 @@ export function ProductDialog({
                     </DialogTitle>
 
                     <DialogDescription>
-                        Fill in the product information below.
+                        Create a new inventory item.
                     </DialogDescription>
 
                 </DialogHeader>
 
-                <div className="grid grid-cols-2 gap-6 py-4">
-
-                    <div className="space-y-2">
-                        <Label>Product Name</Label>
-                        <Input placeholder="Logitech G102" />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>SKU</Label>
-                        <Input placeholder="P001" />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Supplier</Label>
-                        <Input placeholder="Logitech" />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Category</Label>
-                        <Input placeholder="Mouse" />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Stock</Label>
-                        <Input
-                            type="number"
-                            placeholder="50"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Price</Label>
-                        <Input
-                            type="number"
-                            placeholder="895"
-                        />
-                    </div>
-
-                </div>
+                <ProductForm />
 
                 <DialogFooter>
 
-                    <Button
-                        variant="outline"
-                        onClick={() => onOpenChange(false)}
-                    >
+                    <Button variant="outline">
                         Cancel
                     </Button>
 
