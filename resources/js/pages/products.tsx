@@ -1,5 +1,6 @@
 import { Head } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
+import { route } from "ziggy-js";
 import {
     Card,
     CardHeader,
@@ -16,15 +17,16 @@ import {
 } from "@/components/ui/table";
 
 import { ProductDialog } from "@/components/product-dialog";
+
 import { useMemo, useState } from "react";
-export default function Products({ products }: Props)
+import { ProductViewDialog } from "@/components/product-view-dialog";
+import { router } from "@inertiajs/react";
 
 import {
     Search,
     Filter,
     Upload,
     Trash2,
-    CheckSquare,
     Plus,
     MoreVertical,
     Pencil,
@@ -44,6 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import type { Product } from "@/types/product";
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -58,39 +61,24 @@ const getStatusColor = (status: string) => {
     }
 };
 
-
-type Product = {
-    id: number;
-    sku: string;
-    barcode: string | null;
-    name: string;
-    supplier: string;
-    category: string;
-    unit: string;
-    quantity: number;
-    minimum_stock: number;
-    cost_price: number;
-    selling_price: number;
-    status: string;
-    description: string | null;
-    created_at: string;
-};
-
 type Props = {
     products: {
         data: Product[];
     };
 };
-{
+
+export default function Products({ products }: Props) {
+
     const [search, setSearch] = useState("");
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [statusFilter, setStatusFilter] = useState<
         "all" | "Delivered" | "Pending" | "Low Stock"
     >("all");
 
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
-
-    const [dialogOpen, setDialogOpen] = useState(false);
-
+    const [viewOpen, setViewOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] =
+        useState<Product | null>(null);
     const [open, setOpen] = useState(false);
     const filteredProducts = useMemo(() => {
         let data = [...products.data];
@@ -220,7 +208,10 @@ type Props = {
                                 {/* Add Product */}
                                 <Button
                                     size="icon"
-                                    onClick={() => setOpen(true)}
+                                    onClick={() => {
+                                        setEditingProduct(null);
+                                        setOpen(true);
+                                    }}
                                 >
                                     <Plus className="h-4 w-4" />
                                 </Button>
@@ -236,20 +227,21 @@ type Props = {
                             <TableHeader className="sticky top-0 bg-background z-10">
                                 <TableRow className="border-b last:border-0">
 
-                                    <TableCell>
+                                    <TableHead className="w-12">
                                         <Checkbox
-                                            checked={selectedRows.includes(product.id)}
+                                            checked={
+                                                filteredProducts.length > 0 &&
+                                                selectedRows.length === filteredProducts.length
+                                            }
                                             onCheckedChange={(checked) => {
                                                 if (checked) {
-                                                    setSelectedRows([...selectedRows, product.id]);
+                                                    setSelectedRows(filteredProducts.map((p) => p.id));
                                                 } else {
-                                                    setSelectedRows(
-                                                        selectedRows.filter((id) => id !== product.id)
-                                                    );
+                                                    setSelectedRows([]);
                                                 }
                                             }}
                                         />
-                                    </TableCell>
+                                    </TableHead>
 
                                     <TableHead className="w-12"></TableHead>
 
@@ -288,19 +280,13 @@ type Props = {
                                             <Checkbox
                                                 checked={selectedRows.includes(product.id)}
                                                 onCheckedChange={(checked) => {
-
                                                     if (checked) {
-
                                                         setSelectedRows([...selectedRows, product.id]);
-
                                                     } else {
-
                                                         setSelectedRows(
-                                                            selectedRows.filter(id => id !== product.id)
+                                                            selectedRows.filter((id) => id !== product.id)
                                                         );
-
                                                     }
-
                                                 }}
                                             />
                                         </TableCell>
@@ -323,41 +309,73 @@ type Props = {
                                                     className="w-56"
                                                 >
 
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setSelectedProduct(product);
+                                                        setViewOpen(true);
+                                                    }}
+                                                >
                                                     <Eye className="mr-2 h-4 w-4" />
                                                     View Details
                                                 </DropdownMenuItem>
-
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setEditingProduct(product);
+                                                        setOpen(true);
+                                                    }}
+                                                >
                                                     <Pencil className="mr-2 h-4 w-4" />
                                                     Edit Product
                                                 </DropdownMenuItem>
 
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        router.get(route("products.movements", product.id))
+                                                    }
+                                                >
                                                     <Package className="mr-2 h-4 w-4" />
                                                     Stock Movement
                                                 </DropdownMenuItem>
 
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        router.post(route("products.duplicate", product.id))
+                                                    }
+                                                >
                                                     <Copy className="mr-2 h-4 w-4" />
                                                     Duplicate
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuSeparator />
 
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        router.patch(route("products.status", product.id))
+                                                    }
+                                                >
                                                     <BadgeCheck className="mr-2 h-4 w-4" />
                                                     Change Status
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuSeparator />
 
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        router.patch(route("products.archive", product.id))
+                                                    }
+                                                >
                                                     <Archive className="mr-2 h-4 w-4" />
                                                     Archive
                                                 </DropdownMenuItem>
 
-                                                <DropdownMenuItem className="text-red-600">
+                                                <DropdownMenuItem
+                                                    className="text-red-600"
+                                                    onClick={() => {
+                                                        if (confirm(`Delete ${product.name}?`)) {
+                                                            router.delete(`/products/${product.id}`);
+                                                        }
+                                                    }}
+                                                >
                                                     <Trash2 className="mr-2 h-4 w-4" />
                                                     Delete
                                                 </DropdownMenuItem>
@@ -403,9 +421,21 @@ type Props = {
 
                 </Card>
             </div>
-            <ProductDialog
+            <ProductViewDialog
+                open={viewOpen}
+                onOpenChange={setViewOpen}
+                product={selectedProduct}
+            />
+           <ProductDialog
                 open={open}
-                onOpenChange={setOpen}
+                onOpenChange={(value) => {
+                    setOpen(value);
+
+                    if (!value) {
+                        setEditingProduct(null);
+                    }
+                }}
+                product={editingProduct}
             />
         </>
     );

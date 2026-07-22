@@ -10,15 +10,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProductForm } from "./product-form";
+import type { Product } from "@/types/product";
 
 type ProductDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    product?: Product | null;
 };
+
 
 export function ProductDialog({
     open,
     onOpenChange,
+    product,
 }: ProductDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

@@ -13,4 +13,23 @@ class ProductController extends Controller
             'products' => Product::paginate(10),
         ]);
     }
+    public function movements(Product $product)
+    {
+        //
+    }
+
+    public function duplicate(Product $product)
+    {
+        //
+    }
+
+    public function status(Product $product)
+    {
+        //
+    }
+
+    public function archive(Product $product)
+    {
+        //
+    }
 }

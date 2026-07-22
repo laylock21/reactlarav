@@ -10,5 +10,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('products', [ProductController::class, 'index'])
     ->name('products');   
 });
+Route::resource('products', ProductController::class);
+
+Route::get(
+    '/products/{product}/movements',
+    [ProductController::class, 'movements']
+)->name('products.movements');
+
+Route::post(
+    '/products/{product}/duplicate',
+    [ProductController::class, 'duplicate']
+)->name('products.duplicate');
+
+Route::patch(
+    '/products/{product}/status',
+    [ProductController::class, 'status']
+)->name('products.status');
+
+Route::patch(
+    '/products/{product}/archive',
+    [ProductController::class, 'archive']
+)->name('products.archive');
 
 require __DIR__.'/settings.php';
