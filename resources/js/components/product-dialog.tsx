@@ -7,22 +7,24 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ProductForm } from "./product-form";
-import type { Product } from "@/types/product";
 
 type ProductDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    product?: Product | null;
+
+    form: any;
+    setForm: React.Dispatch<React.SetStateAction<any>>;
+    onSave: () => void;
 };
 
 
 export function ProductDialog({
     open,
     onOpenChange,
-    product,
+    form,
+    setForm,
+    onSave,
 }: ProductDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -40,15 +42,21 @@ export function ProductDialog({
 
                 </DialogHeader>
 
-                <ProductForm />
+                <ProductForm
+                    form={form}
+                    setForm={setForm}
+                />
 
                 <DialogFooter>
 
-                    <Button variant="outline">
+                    <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                    >
                         Cancel
                     </Button>
 
-                    <Button>
+                    <Button onClick={onSave}>
                         Save Product
                     </Button>
 

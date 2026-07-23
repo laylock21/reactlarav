@@ -1,4 +1,4 @@
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { route } from "ziggy-js";
 import {
@@ -20,7 +20,6 @@ import { ProductDialog } from "@/components/product-dialog";
 
 import { useMemo, useState } from "react";
 import { ProductViewDialog } from "@/components/product-view-dialog";
-import { router } from "@inertiajs/react";
 
 import {
     Search,
@@ -48,18 +47,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import type { Product } from "@/types/product";
 
-const getStatusColor = (status: string) => {
-    switch (status) {
-        case "Delivered":
-            return "bg-green-600";
-        case "Pending":
-            return "bg-yellow-500";
-        case "In Transit":
-            return "bg-blue-600";
-        default:
-            return "bg-gray-500";
-    }
-};
+
 
 type Props = {
     products: {
@@ -71,9 +59,65 @@ export default function Products({ products }: Props) {
 
     const [search, setSearch] = useState("");
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const emptyForm = {
+        sku: "",
+        barcode: "",
+        name: "",
+        supplier: "",
+        category: "",
+        unit: "",
+        quantity: 0,
+        minimum_stock: 0,
+        cost_price: 0,
+        selling_price: 0,
+        status: "Pending",
+        description: "",
+    };
+
+const [form, setForm] = useState(emptyForm);
     const [statusFilter, setStatusFilter] = useState<
         "all" | "Delivered" | "Pending" | "Low Stock"
     >("all");
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "Delivered":
+                return "bg-green-600";
+            case "Pending":
+                return "bg-yellow-500";
+            case "In Transit":
+                return "bg-blue-600";
+            default:
+                return "bg-gray-500";
+        }
+    };
+
+    const saveProduct = () => {
+        if (editingProduct) {
+            router.put(
+                route("products.update", editingProduct.id),
+                form,
+                {
+                    onSuccess: () => {
+                        setOpen(false);
+                        setEditingProduct(null);
+                        setForm(emptyForm);
+                    },
+                }
+            );
+        } else {
+            router.post(
+                route("products.store"),
+                form,
+                {
+                    onSuccess: () => {
+                        setOpen(false);
+                        setForm(emptyForm);
+                    },
+                }
+            );
+        }
+    };
 
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [viewOpen, setViewOpen] = useState(false);
@@ -210,6 +254,7 @@ export default function Products({ products }: Props) {
                                     size="icon"
                                     onClick={() => {
                                         setEditingProduct(null);
+                                        setForm(emptyForm);
                                         setOpen(true);
                                     }}
                                 >
@@ -311,8 +356,24 @@ export default function Products({ products }: Props) {
 
                                                 <DropdownMenuItem
                                                     onClick={() => {
-                                                        setSelectedProduct(product);
-                                                        setViewOpen(true);
+                                                        setEditingProduct(product);
+
+                                                        setForm({
+                                                            sku: product.sku,
+                                                            barcode: product.barcode ?? "",
+                                                            name: product.name,
+                                                            supplier: product.supplier,
+                                                            category: product.category,
+                                                            unit: product.unit,
+                                                            quantity: product.quantity,
+                                                            minimum_stock: product.minimum_stock,
+                                                            cost_price: product.cost_price,
+                                                            selling_price: product.selling_price,
+                                                            status: product.status,
+                                                            description: product.description ?? "",
+                                                        });
+
+                                                        setOpen(true);
                                                     }}
                                                 >
                                                     <Eye className="mr-2 h-4 w-4" />
@@ -435,7 +496,9 @@ export default function Products({ products }: Props) {
                         setEditingProduct(null);
                     }
                 }}
-                product={editingProduct}
+                form={form}
+                setForm={setForm}
+                onSave={saveProduct}
             />
         </>
     );
