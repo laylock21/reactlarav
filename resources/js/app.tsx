@@ -1,4 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
@@ -9,8 +10,9 @@ import SettingsLayout from '@/layouts/settings/layout';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
-    layout: (name) => {
+    title: (title: string | undefined) =>
+        title ? `${title} - ${appName}` : appName,
+    layout: (name: string) => {
         switch (true) {
             case name === 'welcome':
                 return null;
@@ -23,7 +25,7 @@ createInertiaApp({
         }
     },
     strictMode: true,
-    withApp(app) {
+    withApp(app: React.ReactNode) {
         return (
             <TooltipProvider delayDuration={0}>
                 {app}

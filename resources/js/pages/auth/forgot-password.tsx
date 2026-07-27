@@ -22,7 +22,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
             <div className="space-y-6">
                 <Form {...email.form()}>
-                    {({ processing, errors }) => (
+                    {({ processing, errors }: any) => (
                         <>
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email address</Label>

@@ -1,7 +1,8 @@
 import AppLogo from "@/components/app-logo";
 import AppLogoIcon from "@/components/app-logo-icon";
 import { useSidebar } from "@/components/ui/sidebar";
-import { dashboard, products } from "@/routes";
+import { dashboard } from "@/routes";
+import products from "@/routes/products";
 import { Link } from "@inertiajs/react";
 import {
     LayoutGrid,

@@ -22,7 +22,7 @@ export default function Profile({
     mustVerifyEmail: boolean;
     status?: string;
 }) {
-    const { auth } = usePage<PageProps>().props;
+    const { auth } = (usePage() as any).props;
 
     return (
         <>
@@ -44,7 +44,7 @@ export default function Profile({
                     }}
                     className="space-y-6"
                 >
-                    {({ processing, errors }) => (
+                    {({ processing, errors }: any) => (
                         <>
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Name</Label>

@@ -20,10 +20,10 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
 
             <Form
                 {...update.form()}
-                transform={(data) => ({ ...data, token, email })}
+                transform={(data: any) => ({ ...data, token, email })}
                 resetOnSuccess={['password', 'password_confirmation']}
             >
-                {({ processing, errors }) => (
+                {({ processing, errors }: any) => (
                     <div className="grid gap-6">
                         <div className="grid gap-2">
                             <Label htmlFor="email">Email</Label>

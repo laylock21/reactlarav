@@ -45,7 +45,7 @@ export default function Security(props: Props) {
                         'current_password',
                     ]}
                     resetOnSuccess
-                    onError={(errors) => {
+                    onError={(errors: any) => {
                         if (errors.password) {
                             passwordInput.current?.focus();
                         }
@@ -56,7 +56,7 @@ export default function Security(props: Props) {
                     }}
                     className="space-y-6"
                 >
-                    {({ errors, processing }) => (
+                    {({ errors, processing }: any) => (
                         <>
                             <div className="grid gap-2">
                                 <Label htmlFor="current_password">

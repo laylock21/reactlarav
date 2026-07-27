@@ -27,7 +27,7 @@ export default function ConfirmPassword() {
             />
 
             <Form {...store.form()} resetOnSuccess={['password']}>
-                {({ processing, errors }) => (
+                {({ processing, errors }: any) => (
                     <div className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="password">Password</Label>

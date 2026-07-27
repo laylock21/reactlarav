@@ -19,7 +19,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
             )}
 
             <Form {...send.form()} className="space-y-6 text-center">
-                {({ processing }) => (
+                {({ processing }: any) => (
                     <>
                         <Button disabled={processing} variant="secondary">
                             {processing && <Spinner />}

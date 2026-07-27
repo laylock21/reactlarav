@@ -85,7 +85,7 @@ export default function TwoFactorRecoveryCodes({
                             options={{ preserveScroll: true }}
                             onSuccess={fetchRecoveryCodes}
                         >
-                            {({ processing }) => (
+                            {({ processing }: any) => (
                                 <Button
                                     variant="secondary"
                                     type="submit"

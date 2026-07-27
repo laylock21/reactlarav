@@ -63,7 +63,7 @@ export default function DeleteUser() {
                             resetOnSuccess
                             className="space-y-6"
                         >
-                            {({ resetAndClearErrors, processing, errors }) => (
+                            {({ resetAndClearErrors, processing, errors }: any) => (
                                 <>
                                     <div className="grid gap-2">
                                         <Label

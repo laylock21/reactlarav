@@ -121,7 +121,7 @@ const [form, setForm] = useState(emptyForm);
 
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [viewOpen, setViewOpen] = useState(false);
-    const [selectedProduct, setSelectedProduct] =
+    const [selectedProduct, _setSelectedProduct] =
         useState<Product | null>(null);
     const [open, setOpen] = useState(false);
     const filteredProducts = useMemo(() => {

@@ -60,7 +60,7 @@ export default function TwoFactorChallenge() {
                     resetOnError
                     resetOnSuccess={!showRecoveryInput}
                 >
-                    {({ errors, processing, clearErrors }) => (
+                    {({ errors, processing, clearErrors }: any) => (
                         <>
                             {showRecoveryInput ? (
                                 <>
