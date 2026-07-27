@@ -1,6 +1,6 @@
 import { Head, router } from "@inertiajs/react";
+import products from "@/routes/products";
 import { Button } from "@/components/ui/button";
-import { route } from "ziggy-js";
 import {
     Card,
     CardHeader,
@@ -55,7 +55,7 @@ type Props = {
     };
 };
 
-export default function Products({ products }: Props) {
+export default function Products({ products: productList }: Props) {
 
     const [search, setSearch] = useState("");
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -95,7 +95,7 @@ const [form, setForm] = useState(emptyForm);
     const saveProduct = () => {
         if (editingProduct) {
             router.put(
-                route("products.update", editingProduct.id),
+                products.update(editingProduct.id).url,
                 form,
                 {
                     onSuccess: () => {
@@ -107,7 +107,7 @@ const [form, setForm] = useState(emptyForm);
             );
         } else {
             router.post(
-                route("products.store"),
+                products.store().url,
                 form,
                 {
                     onSuccess: () => {
@@ -125,7 +125,7 @@ const [form, setForm] = useState(emptyForm);
         useState<Product | null>(null);
     const [open, setOpen] = useState(false);
     const filteredProducts = useMemo(() => {
-        let data = [...products.data];
+        let data = [...productList.data];
         // Search
         data = data.filter(product =>
             product.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -390,18 +390,18 @@ const [form, setForm] = useState(emptyForm);
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
-                                                    onClick={() =>
-                                                        router.get(route("products.movements", product.id))
-                                                    }
+                                                    onClick={() => {
+                                                        router.get(products.movements(product.id).url);
+                                                    }}
                                                 >
                                                     <Package className="mr-2 h-4 w-4" />
                                                     Stock Movement
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
-                                                    onClick={() =>
-                                                        router.post(route("products.duplicate", product.id))
-                                                    }
+                                                    onClick={() => {
+                                                        router.post(products.duplicate(product.id).url);
+                                                    }}
                                                 >
                                                     <Copy className="mr-2 h-4 w-4" />
                                                     Duplicate
@@ -410,9 +410,9 @@ const [form, setForm] = useState(emptyForm);
                                                 <DropdownMenuSeparator />
 
                                                 <DropdownMenuItem
-                                                    onClick={() =>
-                                                        router.patch(route("products.status", product.id))
-                                                    }
+                                                    onClick={() => {
+                                                        router.patch(products.status(product.id).url);
+                                                    }}
                                                 >
                                                     <BadgeCheck className="mr-2 h-4 w-4" />
                                                     Change Status
@@ -421,9 +421,9 @@ const [form, setForm] = useState(emptyForm);
                                                 <DropdownMenuSeparator />
 
                                                 <DropdownMenuItem
-                                                    onClick={() =>
-                                                        router.patch(route("products.archive", product.id))
-                                                    }
+                                                    onClick={() => {
+                                                        router.patch(products.archive(product.id).url);
+                                                    }}
                                                 >
                                                     <Archive className="mr-2 h-4 w-4" />
                                                     Archive
@@ -433,7 +433,7 @@ const [form, setForm] = useState(emptyForm);
                                                     className="text-red-600"
                                                     onClick={() => {
                                                         if (confirm(`Delete ${product.name}?`)) {
-                                                            router.delete(`/products/${product.id}`);
+                                                            router.delete(products.destroy(product.id).url);
                                                         }
                                                     }}
                                                 >
