@@ -22,6 +22,7 @@ class Product extends Model
         'selling_price',
         'status',
         'description',
+        'archived',
     ];
 
     protected $archived = [

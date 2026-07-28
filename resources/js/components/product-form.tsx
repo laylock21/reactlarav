@@ -1,6 +1,13 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 type ProductFormProps = {
     form: any;
@@ -106,19 +113,36 @@ export function ProductForm({
                             placeholder="Piece"
                         />
                     </div>
-                    <div>
-                        <Label>Status</Label>
+                    <div className="space-y-2">
+                        <label>Status</label>
 
-                        <Input
+                        <Select
                             value={form.status}
-                            onChange={(e) =>
+                            onValueChange={(value) =>
                                 setForm({
                                     ...form,
-                                    status: e.target.value,
+                                    status: value,
                                 })
                             }
-                            placeholder="Delivered"
-                        />
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Status" />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                <SelectItem value="Pending">
+                                    Pending
+                                </SelectItem>
+
+                                <SelectItem value="Delivered">
+                                    Delivered
+                                </SelectItem>
+
+                                <SelectItem value="In Transit">
+                                    In Transit
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                 </div>

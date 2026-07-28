@@ -11,7 +11,7 @@ class ProductController extends Controller
     public function index()
     {
         return Inertia::render('products', [
-            'products' => Product::paginate(10),
+            'products' => Product::paginate(100),
         ]);
     }
 
@@ -59,9 +59,10 @@ class ProductController extends Controller
             'description' => 'nullable',
         ]);
 
-        $product->update($validated);
+        $product->fill($validated);
+        $product->save();
 
-        return redirect()->back();
+        return to_route('products.index');
     }
 
     public function destroy(Product $product)

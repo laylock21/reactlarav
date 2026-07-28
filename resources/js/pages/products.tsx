@@ -47,11 +47,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import type { Product } from "@/types/product";
 
-
-
 type Props = {
     products: {
         data: Product[];
+
+        current_page: number;
+
+        last_page: number;
+
+        prev_page_url: string | null;
+
+        next_page_url: string | null;
     };
 };
 
@@ -74,7 +80,9 @@ export default function Products({ products: productList }: Props) {
         description: "",
     };
 
-const [form, setForm] = useState(emptyForm);
+type ProductForm = Omit<Product, "id" | "created_at" | "updated_at">;
+
+const [form, setForm] = useState<ProductForm>(emptyForm);
     const [statusFilter, setStatusFilter] = useState<
         "all" | "Delivered" | "Pending" | "Low Stock"
     >("all");
@@ -94,31 +102,26 @@ const [form, setForm] = useState(emptyForm);
 
     const saveProduct = () => {
         if (editingProduct) {
-            router.put(
-                products.update(editingProduct.id).url,
-                form,
-                {
-                    onSuccess: () => {
-                        setOpen(false);
-                        setEditingProduct(null);
-                        setForm(emptyForm);
-                    },
-                }
-            );
+            router.put(products.update(editingProduct.id).url, form, {
+                preserveScroll: true,
+                preserveState: false,
+                onSuccess: () => {
+                    setOpen(false);
+                    setEditingProduct(null);
+                    setForm(emptyForm);
+                },
+            });
         } else {
-            router.post(
-                products.store().url,
-                form,
-                {
-                    onSuccess: () => {
-                        setOpen(false);
-                        setForm(emptyForm);
-                    },
-                }
-            );
+            router.post(products.store().url, form, {
+                preserveScroll: true,
+                preserveState: false,
+                onSuccess: () => {
+                    setOpen(false);
+                    setForm(emptyForm);
+                },
+            });
         }
     };
-
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [viewOpen, setViewOpen] = useState(false);
     const [selectedProduct, _setSelectedProduct] =
@@ -152,7 +155,7 @@ const [form, setForm] = useState(emptyForm);
         <>
             <Head title="Products" />
 
-            <div className="space-y-6 p-6">
+            <div className="space-y-6 p-6 h-screen flex flex-col overflow-hidden">
 
                 <div className="flex items-center justify-between">
 
@@ -166,7 +169,7 @@ const [form, setForm] = useState(emptyForm);
                         </p>
                     </div>
                 </div>
-                <Card>
+                <Card className="flex flex-col flex-1 overflow-hidden">
 
                     <CardHeader className="px-6 py-5">
                         <div className="flex items-center justify-between gap-4">
@@ -265,222 +268,278 @@ const [form, setForm] = useState(emptyForm);
                         </div>
                     </CardHeader>
 
-                    <CardContent className="px-8 pb-6 overflow-x-auto">
+                    <CardContent className="px-8 pb-6 flex flex-col overflow-hidden">
+                        <div className="overflow-x-auto h-full">
+                            <div className="flex-1 min-w-full overflow-y-auto">
+                                <Table>
 
-                        <Table>
+                                    <TableHeader className="sticky top-0 bg-background z-10">
+                                        <TableRow className="border-b last:border-0">
 
-                            <TableHeader className="sticky top-0 bg-background z-10">
-                                <TableRow className="border-b last:border-0">
-
-                                    <TableHead className="w-12">
-                                        <Checkbox
-                                            checked={
-                                                filteredProducts.length > 0 &&
-                                                selectedRows.length === filteredProducts.length
-                                            }
-                                            onCheckedChange={(checked) => {
-                                                if (checked) {
-                                                    setSelectedRows(filteredProducts.map((p) => p.id));
-                                                } else {
-                                                    setSelectedRows([]);
-                                                }
-                                            }}
-                                        />
-                                    </TableHead>
-
-                                    <TableHead className="w-12"></TableHead>
-
-                                    <TableHead>SKU</TableHead>
-
-                                    <TableHead>Supplier</TableHead>
-        
-                                    <TableHead>Product</TableHead>
-
-                                    <TableHead>Category</TableHead>
-
-                                    <TableHead>Stock</TableHead>
-
-                                    <TableHead>Status</TableHead>
-
-                                    <TableHead>Ordered</TableHead>
-
-                                    <TableHead className="text-right">
-                                        Price
-                                    </TableHead>
-
-
-                                </TableRow>
-                            </TableHeader>
-
-                            <TableBody>
-
-                                {filteredProducts.map((product) => (
-
-                                    <TableRow
-                                        key={product.id}
-                                        className="border-b border-slate-200 dark:border-slate-800"
-                                    >
-                                        
-                                        <TableCell>
-                                            <Checkbox
-                                                checked={selectedRows.includes(product.id)}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        setSelectedRows([...selectedRows, product.id]);
-                                                    } else {
-                                                        setSelectedRows(
-                                                            selectedRows.filter((id) => id !== product.id)
-                                                        );
+                                            <TableHead className="w-12">
+                                                <Checkbox
+                                                    checked={
+                                                        filteredProducts.length > 0 &&
+                                                        selectedRows.length === filteredProducts.length
                                                     }
-                                                }}
-                                            />
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <DropdownMenu>
-
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                    >
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-
-                                                <DropdownMenuContent
-                                                    align="start"
-                                                    sideOffset={8}
-                                                    className="w-56"
-                                                >
-
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        setEditingProduct(product);
-
-                                                        setForm({
-                                                            sku: product.sku,
-                                                            barcode: product.barcode ?? "",
-                                                            name: product.name,
-                                                            supplier: product.supplier,
-                                                            category: product.category,
-                                                            unit: product.unit,
-                                                            quantity: product.quantity,
-                                                            minimum_stock: product.minimum_stock,
-                                                            cost_price: product.cost_price,
-                                                            selling_price: product.selling_price,
-                                                            status: product.status,
-                                                            description: product.description ?? "",
-                                                        });
-
-                                                        setOpen(true);
-                                                    }}
-                                                >
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    View Details
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        setEditingProduct(product);
-                                                        setOpen(true);
-                                                    }}
-                                                >
-                                                    <Pencil className="mr-2 h-4 w-4" />
-                                                    Edit Product
-                                                </DropdownMenuItem>
-
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        router.get(products.movements(product.id).url);
-                                                    }}
-                                                >
-                                                    <Package className="mr-2 h-4 w-4" />
-                                                    Stock Movement
-                                                </DropdownMenuItem>
-
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        router.post(products.duplicate(product.id).url);
-                                                    }}
-                                                >
-                                                    <Copy className="mr-2 h-4 w-4" />
-                                                    Duplicate
-                                                </DropdownMenuItem>
-
-                                                <DropdownMenuSeparator />
-
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        router.patch(products.status(product.id).url);
-                                                    }}
-                                                >
-                                                    <BadgeCheck className="mr-2 h-4 w-4" />
-                                                    Change Status
-                                                </DropdownMenuItem>
-
-                                                <DropdownMenuSeparator />
-
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        router.patch(products.archive(product.id).url);
-                                                    }}
-                                                >
-                                                    <Archive className="mr-2 h-4 w-4" />
-                                                    Archive
-                                                </DropdownMenuItem>
-
-                                                <DropdownMenuItem
-                                                    className="text-red-600"
-                                                    onClick={() => {
-                                                        if (confirm(`Delete ${product.name}?`)) {
-                                                            router.delete(products.destroy(product.id).url);
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setSelectedRows(filteredProducts.map((p) => p.id));
+                                                        } else {
+                                                            setSelectedRows([]);
                                                         }
                                                     }}
-                                                >
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                    Delete
-                                                </DropdownMenuItem>
+                                                />
+                                            </TableHead>
 
-                                            </DropdownMenuContent>
+                                            <TableHead className="w-12"></TableHead>
 
-                                            </DropdownMenu>
-                                        </TableCell>
+                                            <TableHead>SKU</TableHead>
 
-                                        <TableCell>{product.sku}</TableCell>
+                                            <TableHead>Supplier</TableHead>
+                
+                                            <TableHead>Product</TableHead>
 
-                                        <TableCell>{product.supplier}</TableCell>
+                                            <TableHead>Category</TableHead>
 
-                                        <TableCell className="font-medium">
-                                            {product.name}
-                                        </TableCell>
+                                            <TableHead>Stock</TableHead>
 
-                                        <TableCell>{product.category}</TableCell>
+                                            <TableHead>Status</TableHead>
 
-                                        <TableCell>{product.quantity}</TableCell>
+                                            <TableHead>Ordered</TableHead>
 
-                                        <TableCell>
-                                        <Badge className={getStatusColor(product.status)}>
-                                            {product.status}
-                                        </Badge>
-                                        </TableCell>
+                                            <TableHead className="text-right">
+                                                Price
+                                            </TableHead>
 
-                                        <TableCell>{new Date(product.created_at).toLocaleDateString()}</TableCell>
 
-                                        <TableCell className="text-right">
-                                            ₱{Number(product.selling_price).toLocaleString()}
-                                        </TableCell>
+                                        </TableRow>
+                                    </TableHeader>
 
-                                    </TableRow>
+                                    <TableBody>
 
-                                ))}
+                                        {filteredProducts.map((product) => (
 
-                            </TableBody>
+                                            <TableRow
+                                                key={product.id}
+                                                className="border-b border-slate-200 dark:border-slate-800"
+                                            >
+                                                
+                                                <TableCell>
+                                                    <Checkbox
+                                                        checked={selectedRows.includes(product.id)}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setSelectedRows([...selectedRows, product.id]);
+                                                            } else {
+                                                                setSelectedRows(
+                                                                    selectedRows.filter((id) => id !== product.id)
+                                                                );
+                                                            }
+                                                        }}
+                                                    />
+                                                </TableCell>
 
-                        </Table>
+                                                <TableCell>
+                                                    <DropdownMenu>
 
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                            >
+                                                                <MoreVertical className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+
+                                                        <DropdownMenuContent
+                                                            align="start"
+                                                            sideOffset={8}
+                                                            className="w-56"
+                                                        >
+
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                setEditingProduct(product);
+
+                                                                setForm({
+                                                                    sku: product.sku,
+                                                                    barcode: product.barcode ?? "",
+                                                                    name: product.name,
+                                                                    supplier: product.supplier,
+                                                                    category: product.category,
+                                                                    unit: product.unit,
+                                                                    quantity: product.quantity,
+                                                                    minimum_stock: product.minimum_stock,
+                                                                    cost_price: product.cost_price,
+                                                                    selling_price: product.selling_price,
+                                                                    status: product.status,
+                                                                    description: product.description ?? "",
+                                                                });
+
+                                                                setOpen(true);
+                                                            }}
+                                                        >
+                                                            <Eye className="mr-2 h-4 w-4" />
+                                                            View Details
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                setEditingProduct(product);
+
+                                                                setForm({
+                                                                    sku: product.sku,
+                                                                    barcode: product.barcode ?? "",
+                                                                    name: product.name,
+                                                                    supplier: product.supplier,
+                                                                    category: product.category,
+                                                                    unit: product.unit,
+                                                                    quantity: product.quantity,
+                                                                    minimum_stock: product.minimum_stock,
+                                                                    cost_price: product.cost_price,
+                                                                    selling_price: product.selling_price,
+                                                                    status: product.status,
+                                                                    description: product.description ?? "",
+                                                                });
+
+                                                                setOpen(true);
+                                                            }}
+                                                        >
+                                                            <Pencil className="mr-2 h-4 w-4" />
+                                                            Edit Product
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                router.get(products.movements(product.id).url);
+                                                            }}
+                                                        >
+                                                            <Package className="mr-2 h-4 w-4" />
+                                                            Stock Movement
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                router.post(products.duplicate(product.id).url);
+                                                            }}
+                                                        >
+                                                            <Copy className="mr-2 h-4 w-4" />
+                                                            Duplicate
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuSeparator />
+
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                router.patch(products.status(product.id).url);
+                                                            }}
+                                                        >
+                                                            <BadgeCheck className="mr-2 h-4 w-4" />
+                                                            Change Status
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuSeparator />
+
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                router.patch(products.archive(product.id).url);
+                                                            }}
+                                                        >
+                                                            <Archive className="mr-2 h-4 w-4" />
+                                                            Archive
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuItem
+                                                            className="text-red-600"
+                                                            onClick={() => {
+                                                                if (confirm(`Delete ${product.name}?`)) {
+                                                                    router.delete(products.destroy(product.id).url);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Delete
+                                                        </DropdownMenuItem>
+
+                                                    </DropdownMenuContent>
+
+                                                    </DropdownMenu>
+                                                </TableCell>
+
+                                                <TableCell>{product.sku}</TableCell>
+
+                                                <TableCell>{product.supplier}</TableCell>
+
+                                                <TableCell className="font-medium">
+                                                    {product.name}
+                                                </TableCell>
+
+                                                <TableCell>{product.category}</TableCell>
+
+                                                <TableCell>{product.quantity}</TableCell>
+
+                                                <TableCell>
+                                                <Badge className={getStatusColor(product.status)}>
+                                                    {product.status}
+                                                </Badge>
+                                                </TableCell>
+
+                                                <TableCell>{new Date(product.created_at).toLocaleDateString()}</TableCell>
+
+                                                <TableCell className="text-right">
+                                                    ₱{Number(product.selling_price).toLocaleString()}
+                                                </TableCell>
+
+                                            </TableRow>
+
+                                        ))}
+
+                                    </TableBody>
+
+                                </Table>
+                            </div>
+                        </div>
                     </CardContent>
-
                 </Card>
+            <div className="mt-6 flex items-center justify-center gap-2">
+
+                <Button
+                    variant="outline"
+                    disabled={productList.current_page === 1}
+                    onClick={() => router.get(productList.prev_page_url)}
+                >
+                    Previous
+                </Button>
+
+                {Array.from(
+                    { length: Math.max(productList.last_page, 5) },
+                    (_, i) => (
+                        <Button
+                            key={i}
+                            variant={
+                                productList.current_page === i + 1
+                                    ? "default"
+                                    : "outline"
+                            }
+                            disabled={i + 1 > productList.last_page}
+                            onClick={() =>
+                                router.get(`/products?page=${i + 1}`)
+                            }
+                        >
+                            {i + 1}
+                        </Button>
+                    )
+                )}
+
+                <Button
+                    variant="outline"
+                    disabled={productList.current_page === productList.last_page}
+                    onClick={() => router.get(productList.next_page_url)}
+                >
+                    Next
+                </Button>
+
+            </div>
             </div>
             <ProductViewDialog
                 open={viewOpen}
@@ -494,8 +553,10 @@ const [form, setForm] = useState(emptyForm);
 
                     if (!value) {
                         setEditingProduct(null);
+                        setForm(emptyForm);
                     }
                 }}
+                editingProduct={editingProduct}
                 form={form}
                 setForm={setForm}
                 onSave={saveProduct}

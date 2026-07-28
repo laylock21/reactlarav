@@ -8,10 +8,13 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { ProductForm } from "./product-form";
+import type { Product } from "@/types/product";
 
 type ProductDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+
+    editingProduct: Product | null;
 
     form: any;
     setForm: React.Dispatch<React.SetStateAction<any>>;
@@ -22,6 +25,7 @@ type ProductDialogProps = {
 export function ProductDialog({
     open,
     onOpenChange,
+    editingProduct,
     form,
     setForm,
     onSave,
@@ -33,11 +37,13 @@ export function ProductDialog({
                 <DialogHeader>
 
                     <DialogTitle>
-                        Add Product
+                        {editingProduct ? "Edit Product" : "Add Product"}
                     </DialogTitle>
 
                     <DialogDescription>
-                        Create a new inventory item.
+                        {editingProduct
+                            ? "Update this inventory item."
+                            : "Create a new inventory item."}
                     </DialogDescription>
 
                 </DialogHeader>
