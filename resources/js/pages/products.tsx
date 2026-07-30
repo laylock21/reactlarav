@@ -78,6 +78,7 @@ export default function Products({ products: productList }: Props) {
         selling_price: 0,
         status: "Pending",
         description: "",
+        archived: false,
     };
 
 type ProductForm = Omit<Product, "id" | "created_at" | "updated_at">;
@@ -124,7 +125,7 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
     };
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [viewOpen, setViewOpen] = useState(false);
-    const [selectedProduct, _setSelectedProduct] =
+    const [selectedProduct, setSelectedProduct] =
         useState<Product | null>(null);
     const [open, setOpen] = useState(false);
     const filteredProducts = useMemo(() => {
@@ -360,24 +361,8 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
                                                         <DropdownMenuItem
                                                             onClick={() => {
-                                                                setEditingProduct(product);
-
-                                                                setForm({
-                                                                    sku: product.sku,
-                                                                    barcode: product.barcode ?? "",
-                                                                    name: product.name,
-                                                                    supplier: product.supplier,
-                                                                    category: product.category,
-                                                                    unit: product.unit,
-                                                                    quantity: product.quantity,
-                                                                    minimum_stock: product.minimum_stock,
-                                                                    cost_price: product.cost_price,
-                                                                    selling_price: product.selling_price,
-                                                                    status: product.status,
-                                                                    description: product.description ?? "",
-                                                                });
-
-                                                                setOpen(true);
+                                                                setSelectedProduct(product);
+                                                                setViewOpen(true);
                                                             }}
                                                         >
                                                             <Eye className="mr-2 h-4 w-4" />
@@ -400,6 +385,7 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                                                     selling_price: product.selling_price,
                                                                     status: product.status,
                                                                     description: product.description ?? "",
+                                                                    archived: product.archived,
                                                                 });
 
                                                                 setOpen(true);
@@ -545,6 +531,31 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                 open={viewOpen}
                 onOpenChange={setViewOpen}
                 product={selectedProduct}
+                onEdit={() => {
+                    if (!selectedProduct) return;
+
+                    setViewOpen(false);
+
+                    setEditingProduct(selectedProduct);
+
+                    setForm({
+                        sku: selectedProduct.sku,
+                        barcode: selectedProduct.barcode ?? "",
+                        name: selectedProduct.name,
+                        supplier: selectedProduct.supplier,
+                        category: selectedProduct.category,
+                        unit: selectedProduct.unit,
+                        quantity: selectedProduct.quantity,
+                        minimum_stock: selectedProduct.minimum_stock,
+                        cost_price: selectedProduct.cost_price,
+                        selling_price: selectedProduct.selling_price,
+                        status: selectedProduct.status,
+                        description: selectedProduct.description ?? "",
+                        archived: selectedProduct.archived,
+                    });
+
+                    setOpen(true);
+                }}
             />
            <ProductDialog
                 open={open}
