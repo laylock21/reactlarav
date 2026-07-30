@@ -564,13 +564,12 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
                     if (!value) {
                         setEditingProduct(null);
-                        setForm(emptyForm);
                     }
                 }}
-                editingProduct={editingProduct}
                 form={form}
                 setForm={setForm}
                 onSave={saveProduct}
+                editing={editingProduct !== null}
             />
         </>
     );

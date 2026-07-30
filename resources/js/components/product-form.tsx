@@ -19,18 +19,26 @@ export function ProductForm({
     setForm,
 }: ProductFormProps) {
     return (
-        <div className="space-y-8">
+        <div className="space-y-10 px-2">
 
             {/* Product Information */}
             <div className="space-y-4">
 
-                <h3 className="text-lg font-semibold">
-                    Product Information
-                </h3>
+                <div className="border-b pb-3">
 
-                <div className="grid grid-cols-2 gap-4">
+                    <h3 className="text-lg font-semibold">
+                        Product Information
+                    </h3>
 
-                    <div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Basic information used to identify this product.
+                    </p>
+
+                </div>
+
+                <div className="grid grid-cols-3 gap-5">
+
+                    <div className="space-y-2">
                         <Label>Product Name</Label>
                         <Input
                             value={form.name}
@@ -44,7 +52,7 @@ export function ProductForm({
                         />
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>SKU</Label>
                         <Input
                             value={form.sku}
@@ -58,7 +66,7 @@ export function ProductForm({
                         />
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Barcode</Label>
                         <Input
                             value={form.barcode}
@@ -72,7 +80,7 @@ export function ProductForm({
                         />
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Category</Label>
                         <Input
                             value={form.category}
@@ -86,7 +94,7 @@ export function ProductForm({
                         />
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Supplier</Label>
                         <Input
                             value={form.supplier}
@@ -100,7 +108,7 @@ export function ProductForm({
                         />
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Unit</Label>
                         <Input
                             value={form.unit}
@@ -114,7 +122,7 @@ export function ProductForm({
                         />
                     </div>
                     <div className="space-y-2">
-                        <label>Status</label>
+                        <Label>Status</Label>
 
                         <Select
                             value={form.status}
@@ -153,13 +161,21 @@ export function ProductForm({
 
             <div className="space-y-4">
 
-                <h3 className="text-lg font-semibold">
-                    Inventory
-                </h3>
+                <div className="border-b pb-3">
+
+                    <h3 className="text-lg font-semibold">
+                        Inventory
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Configure available stock and inventory limits.
+                    </p>
+
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Quantity</Label>
                         <Input
                             type="number"
@@ -173,7 +189,7 @@ export function ProductForm({
                         />
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Minimum Stock</Label>
                         <Input
                             type="number"
@@ -195,13 +211,22 @@ export function ProductForm({
 
             <div className="space-y-4">
 
-                <h3 className="text-lg font-semibold">
-                    Pricing
-                </h3>
+                <div className="border-b pb-3">
+
+                    <h3 className="text-lg font-semibold">
+                        Pricing
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Product purchasing and selling prices.
+                    </p>
+
+                </div>
+                
 
                 <div className="grid grid-cols-2 gap-4">
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Cost Price</Label>
                         <Input
                             type="number"
@@ -215,7 +240,7 @@ export function ProductForm({
                         />
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Selling Price</Label>
                         <Input
                             type="number"
@@ -229,6 +254,20 @@ export function ProductForm({
                         />
                     </div>
 
+                    <div className="space-y-2">
+
+                        <Label>Profit</Label>
+
+                        <Input
+                            disabled
+                            value={`₱${(
+                                Number(form.selling_price) -
+                                Number(form.cost_price)
+                            ).toLocaleString()}`}
+                        />
+
+                    </div>
+
                 </div>
 
             </div>
@@ -237,7 +276,17 @@ export function ProductForm({
 
             <div>
 
-                <Label>Description</Label>
+                <div className="border-b pb-3 mb-4">
+
+                    <h3 className="text-lg font-semibold">
+                        Notes
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Additional product information.
+                    </p>
+
+                </div>
 
                 <Textarea
                     rows={5}

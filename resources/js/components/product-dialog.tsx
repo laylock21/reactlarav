@@ -1,74 +1,91 @@
 import { Button } from "@/components/ui/button";
+
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet";
+
 import { ProductForm } from "./product-form";
-import type { Product } from "@/types/product";
 
 type ProductDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 
-    editingProduct: Product | null;
-
     form: any;
     setForm: React.Dispatch<React.SetStateAction<any>>;
     onSave: () => void;
-};
 
+    editing?: boolean;
+};
 
 export function ProductDialog({
     open,
     onOpenChange,
-    editingProduct,
     form,
     setForm,
     onSave,
+    editing = false,
 }: ProductDialogProps) {
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
+        <Sheet
+            open={open}
+            onOpenChange={onOpenChange}
+        >
+            <SheetContent
+                side="right"
+                className="w-[700px] sm:max-w-[700px] h-screen overflow-y-auto p-0"
+            >
+                <div className="flex h-full flex-col">
 
-                <DialogHeader>
+                    {/* Header */}
 
-                    <DialogTitle>
-                        {editingProduct ? "Edit Product" : "Add Product"}
-                    </DialogTitle>
+                    <SheetHeader className="border-b px-6 py-5">
 
-                    <DialogDescription>
-                        {editingProduct
-                            ? "Update this inventory item."
-                            : "Create a new inventory item."}
-                    </DialogDescription>
+                        <SheetTitle className="text-2xl">
 
-                </DialogHeader>
+                            {editing
+                                ? "Edit Product"
+                                : "Add Product"}
 
-                <ProductForm
-                    form={form}
-                    setForm={setForm}
-                />
+                        </SheetTitle>
 
-                <DialogFooter>
+                    </SheetHeader>
 
-                    <Button
-                        variant="outline"
-                        onClick={() => onOpenChange(false)}
-                    >
-                        Cancel
-                    </Button>
+                    {/* Form */}
 
-                    <Button onClick={onSave}>
-                        Save Product
-                    </Button>
+                    <div className="flex-1 overflow-y-auto p-6">
 
-                </DialogFooter>
+                        <ProductForm
+                            form={form}
+                            setForm={setForm}
+                        />
 
-            </DialogContent>
-        </Dialog>
+                    </div>
+
+                    {/* Footer */}
+
+                    <div className="border-t p-5 flex justify-end gap-3">
+
+                        <Button
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                        >
+                            Cancel
+                        </Button>
+
+                        <Button onClick={onSave}>
+                            {editing
+                                ? "Save Changes"
+                                : "Create Product"}
+                        </Button>
+
+                    </div>
+
+                </div>
+
+            </SheetContent>
+        </Sheet>
     );
 }

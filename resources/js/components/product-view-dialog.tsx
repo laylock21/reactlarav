@@ -1,9 +1,9 @@
-    import {
-        Dialog,
-        DialogContent,
-        DialogHeader,
-        DialogTitle,
-    } from "@/components/ui/dialog";
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet";
 
     import { Badge } from "@/components/ui/badge";
     import { Button } from "@/components/ui/button";
@@ -39,14 +39,35 @@
             Number(product.selling_price) - Number(product.cost_price);
 
         return (
-            <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto">
+            <Sheet open={open} onOpenChange={onOpenChange}>
+                <SheetContent
+                side="right"
+                    className="
+                        fixed
+                        right-0
+                        top-0
+                        h-screen
+                        w-[55vw]
+                        max-w-none
+                        rounded-none
+                        sm:max-w-none
+                        border-l
+                        bg-background
+                        p-8
+                        overflow-y-auto
 
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl">
-                            Product Details
-                        </DialogTitle>
-                    </DialogHeader>
+                        data-[state=open]:animate-in
+                        data-[state=closed]:animate-out
+                        data-[state=open]:slide-in-from-right
+                        data-[state=closed]:slide-out-to-right
+                    "
+                >
+
+                    <SheetHeader>
+                        <SheetTitle className="text-2xl">
+                            Product Details 
+                        </SheetTitle>
+                    </SheetHeader>
 
                     {/* HEADER CARD */}
 
@@ -285,8 +306,8 @@
 
                     </div>
 
-                </DialogContent>
-            </Dialog>
+                </SheetContent>
+            </Sheet>
         );
     }
 
