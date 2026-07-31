@@ -21,6 +21,7 @@ import { ProductDialog } from "@/components/product-dialog";
 import { useMemo, useState } from "react";
 import { ProductViewDialog } from "@/components/product-view-dialog";
 
+
 import {
     Search,
     Filter,
@@ -45,6 +46,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import type { Product } from "@/types/product";
 
 type Props = {
@@ -123,11 +133,38 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
             });
         }
     };
+
+    const confirmDelete = () => {
+        if (deleteTarget) {
+            router.delete(products.destroy(deleteTarget.id).url, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setDeleteOpen(false);
+                    setDeleteTarget(null);
+
+                    // toast goes here later
+                },
+            });
+        } else if (selectedRows.length) {
+            selectedRows.forEach(id => {
+                router.delete(products.destroy(id).url);
+            });
+
+            setDeleteOpen(false);
+            setSelectedRows([]);
+
+            // toast goes here later
+        }
+    };
+
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [viewOpen, setViewOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] =
         useState<Product | null>(null);
     const [open, setOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+    const [bulkDelete, setBulkDelete] = useState(false);
     const filteredProducts = useMemo(() => {
         let data = [...productList.data];
         // Search
@@ -244,10 +281,11 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                 <Button
                                     variant="outline"
                                     size="icon"
+                                    disabled={selectedRows.length === 0}
                                     onClick={() => {
-                                        alert(
-                                            `Delete ${selectedRows.length} selected products`
-                                        );
+                                        setBulkDelete(true);
+                                        setDeleteTarget(null);
+                                        setDeleteOpen(true);
                                     }}
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -438,9 +476,9 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                                         <DropdownMenuItem
                                                             className="text-red-600"
                                                             onClick={() => {
-                                                                if (confirm(`Delete ${product.name}?`)) {
-                                                                    router.delete(products.destroy(product.id).url);
-                                                                }
+                                                                setBulkDelete(false);
+                                                                setDeleteTarget(product);
+                                                                setDeleteOpen(true);
                                                             }}
                                                         >
                                                             <Trash2 className="mr-2 h-4 w-4" />
@@ -487,43 +525,82 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                         </div>
                     </CardContent>
                 </Card>
-            <div className="mt-6 flex items-center justify-center gap-2">
+            <div className="mt-6 flex items-center justify-between">
 
-                <Button
-                    variant="outline"
-                    disabled={productList.current_page === 1}
-                    onClick={() => router.get(productList.prev_page_url)}
-                >
-                    Previous
-                </Button>
+                {/* LEFT - Page Size */}
+                <div className="flex items-center gap-2">
 
-                {Array.from(
-                    { length: Math.max(productList.last_page, 5) },
-                    (_, i) => (
-                        <Button
-                            key={i}
-                            variant={
-                                productList.current_page === i + 1
-                                    ? "default"
-                                    : "outline"
-                            }
-                            disabled={i + 1 > productList.last_page}
-                            onClick={() =>
-                                router.get(`/products?page=${i + 1}`)
-                            }
-                        >
-                            {i + 1}
-                        </Button>
-                    )
-                )}
+                    <span className="text-sm text-muted-foreground">
+                        Go to page
+                    </span>
 
-                <Button
-                    variant="outline"
-                    disabled={productList.current_page === productList.last_page}
-                    onClick={() => router.get(productList.next_page_url)}
-                >
-                    Next
-                </Button>
+                    <select
+                        className="h-9 rounded-md border bg-background px-3 text-sm"
+                        value={productList.current_page}
+                        onChange={(e) =>
+                            router.get(`/products?page=${e.target.value}`)
+                        }
+                    >
+                        {Array.from(
+                            { length: productList.last_page },
+                            (_, i) => (
+                                <option
+                                    key={i + 1}
+                                    value={i + 1}
+                                >
+                                    {i + 1}
+                                </option>
+                            )
+                        )}
+                    </select>
+
+                </div>
+
+                {/* CENTER - Pagination */}
+                <div className="flex items-center gap-2">
+
+                    <Button
+                        variant="outline"
+                        disabled={productList.current_page === 1}
+                        onClick={() => router.get(productList.prev_page_url!)}
+                    >
+                        Previous
+                    </Button>
+
+                    {Array.from(
+                        { length: Math.max(productList.last_page, 5) },
+                        (_, i) => (
+                            <Button
+                                key={i}
+                                variant={
+                                    productList.current_page === i + 1
+                                        ? "default"
+                                        : "outline"
+                                }
+                                disabled={i + 1 > productList.last_page}
+                                onClick={() =>
+                                    router.get(`/products?page=${i + 1}`)
+                                }
+                            >
+                                {i + 1}
+                            </Button>
+                        )
+                    )}
+
+                    <Button
+                        variant="outline"
+                        disabled={productList.current_page === productList.last_page}
+                        onClick={() => router.get(productList.next_page_url!)}
+                    >
+                        Next
+                    </Button>
+
+                </div>
+
+                {/* RIGHT - Page Indicator */}
+                <div className="text-sm text-muted-foreground whitespace-nowrap">
+                    Page {productList.current_page} of {productList.last_page}
+                </div>
 
             </div>
             </div>
@@ -571,7 +648,40 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                 onSave={saveProduct}
                 editing={editingProduct !== null}
             />
+            <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                <DialogContent>
+
+                    <DialogHeader>
+                        <DialogTitle className="text-red-600">
+                            Delete Product
+                        </DialogTitle>
+
+                        <DialogDescription>
+                            {deleteTarget
+                                ? `Are you sure you want to permanently delete "${deleteTarget.name}"?`
+                                : `Delete ${selectedRows.length} selected products?`}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter>
+
+                        <DialogClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+
+                        <Button
+                            className="bg-red-600 hover:bg-red-700"
+                            onClick={confirmDelete}
+                        >
+                            Delete
+                        </Button>
+
+                    </DialogFooter>
+
+                </DialogContent>
+            </Dialog>
         </>
+        
     );
 }
 
