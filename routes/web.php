@@ -12,6 +12,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('products', ProductController::class);
 
+    Route::get('/products/export/csv', [ProductController::class, 'exportCsv'])
+        ->name('products.export.csv');
+
+    Route::get('/products/export/pdf', [ProductController::class, 'exportPdf'])
+        ->name('products.export.pdf');
+
     Route::get(
         '/products/{product}/movements',
         [ProductController::class, 'movements']

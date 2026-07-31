@@ -34,7 +34,6 @@ import {
     Copy,
     Package,
     Archive,
-    BadgeCheck,
 } from "lucide-react";
 
 import {
@@ -73,6 +72,9 @@ type Props = {
 
 export default function Products({ products: productList }: Props) {
     const [search, setSearch] = useState("");
+    const [statusOpen, setStatusOpen] = useState(false);
+    const [statusProduct, setStatusProduct] = useState<Product | null>(null);
+    const [newStatus, setNewStatus] = useState("");
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const emptyForm = {
         sku: "",
@@ -280,13 +282,17 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem
-                                            onClick={() => console.log("Export CSV")}
+                                            onClick={() => {
+                                                window.location.href = "/products/export/csv";
+                                            }}
                                         >
                                             CSV
                                         </DropdownMenuItem>
 
                                         <DropdownMenuItem
-                                            onClick={() => console.log("Export PDF")}
+                                            onClick={() => {
+                                                window.location.href = "/products/export/pdf";
+                                            }}
                                         >
                                             PDF
                                         </DropdownMenuItem>
@@ -469,15 +475,6 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
                                                         <DropdownMenuSeparator />
 
-                                                        <DropdownMenuItem
-                                                            onClick={() => {
-                                                                router.patch(products.status(product.id).url);
-                                                            }}
-                                                        >
-                                                            <BadgeCheck className="mr-2 h-4 w-4" />
-                                                            Change Status
-                                                        </DropdownMenuItem>
-
                                                         <DropdownMenuSeparator />
 
                                                         <DropdownMenuItem
@@ -519,9 +516,44 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                                 <TableCell>{product.quantity}</TableCell>
 
                                                 <TableCell>
-                                                <Badge className={getStatusColor(product.status)}>
-                                                    {product.status}
-                                                </Badge>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <button>
+                                                                <Badge className={getStatusColor(product.status)}>
+                                                                    {product.status}
+                                                                </Badge>
+                                                            </button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent>
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    setStatusProduct(product);
+                                                                    setNewStatus("Pending");
+                                                                    setStatusOpen(true);
+                                                                }}
+                                                            >
+                                                                Pending
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    setStatusProduct(product);
+                                                                    setNewStatus("Delivered");
+                                                                    setStatusOpen(true);
+                                                                }}
+                                                            >
+                                                                Delivered
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    setStatusProduct(product);
+                                                                    setNewStatus("In Transit");
+                                                                    setStatusOpen(true);
+                                                                }}
+                                                            >
+                                                                In Transit
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                                 </TableCell>
 
                                                 <TableCell>{new Date(product.created_at).toLocaleDateString()}</TableCell>
@@ -693,12 +725,95 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                         </Button>
 
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            <Dialog
+                open={statusOpen}
+                onOpenChange={setStatusOpen}
+            >
+                <DialogContent>
+
+                    <DialogHeader>
+
+                        <DialogTitle>
+                            Change Product Status
+                        </DialogTitle>
+
+                        <DialogDescription>
+
+                            Change
+
+                            <strong>
+                                {" "}
+                                {statusProduct?.name}
+                                {" "}
+                            </strong>
+
+                            to
+
+                            <strong>
+                                {" "}
+                                {newStatus}
+                            </strong>
+
+                            ?
+
+                        </DialogDescription>
+
+                    </DialogHeader>
+
+                    <DialogFooter>
+
+                        <DialogClose asChild>
+
+                            <Button variant="outline">
+                                Cancel
+                            </Button>
+
+                        </DialogClose>
+
+                        <Button
+
+                            onClick={() => {
+
+                                if (!statusProduct) return;
+
+                                router.patch(
+                                    products.status(statusProduct.id).url,
+                                    {
+                                        status: newStatus,
+                                    },
+                                    {
+                                        preserveScroll: true,
+
+                                        onSuccess: () => {
+
+                                            setStatusOpen(false);
+
+                                            router.reload({
+                                                only: ["products"],
+                                            });
+
+                                        },
+                                    }
+                                );
+
+                            }}
+
+                        >
+
+                            Confirm
+
+                        </Button>
+
+                    </DialogFooter>
 
                 </DialogContent>
+
             </Dialog>
         </>
         
-    );
+    ); 
 }
 
 

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProductController extends Controller
 {
@@ -13,6 +15,17 @@ class ProductController extends Controller
         return Inertia::render('products', [
             'products' => Product::paginate(100),
         ]);
+    }
+    public function exportPdf()
+    {
+        $products = Product::all();
+
+        $pdf = Pdf::loadView(
+            'exports.products',
+            compact('products')
+        );
+
+        return $pdf->download('products.pdf');
     }
 
     public function store(Request $request)
@@ -64,6 +77,51 @@ class ProductController extends Controller
 
         return to_route('products.index');
     }
+    public function exportCsv(): StreamedResponse
+    {
+        $products = Product::all();
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=products.csv',
+        ];
+
+        return response()->stream(function () use ($products) {
+
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, [
+                'SKU',
+                'Barcode',
+                'Product',
+                'Supplier',
+                'Category',
+                'Stock',
+                'Status',
+                'Cost Price',
+                'Selling Price',
+            ]);
+
+            foreach ($products as $product) {
+
+                fputcsv($file, [
+                    $product->sku,
+                    $product->barcode,
+                    $product->name,
+                    $product->supplier,
+                    $product->category,
+                    $product->quantity,
+                    $product->status,
+                    $product->cost_price,
+                    $product->selling_price,
+                ]);
+
+            }
+
+            fclose($file);
+
+        },200,$headers);
+    }
 
     public function destroy(Product $product)
     {
@@ -88,25 +146,17 @@ class ProductController extends Controller
 
         return redirect()->back();
     }
-    public function status(Product $product)
+    public function status(Request $request, Product $product)
     {
-        $statuses = [
-            "Pending",
-            "Delivered",
-            "In Transit",
-        ];
-
-        $current = array_search($product->status, $statuses);
-
-        $next = ($current + 1) % count($statuses);
-
-        $product->update([
-            "status" => $statuses[$next],
+        $request->validate([
+            'status' => 'required|in:Pending,Delivered,In Transit',
         ]);
 
-        return redirect()->back();
-    }
+        $product->status = $request->status;
+        $product->save();
 
+        return back();
+    }
     public function archive(Product $product)
     {
         $product->update([
