@@ -18,7 +18,7 @@ import {
 
 import { ProductDialog } from "@/components/product-dialog";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ProductViewDialog } from "@/components/product-view-dialog";
 
 
@@ -72,7 +72,6 @@ type Props = {
 };
 
 export default function Products({ products: productList }: Props) {
-
     const [search, setSearch] = useState("");
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const emptyForm = {
@@ -133,27 +132,39 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
             });
         }
     };
-
     const confirmDelete = () => {
         if (deleteTarget) {
             router.delete(products.destroy(deleteTarget.id).url, {
                 preserveScroll: true,
+
                 onSuccess: () => {
+                    setProductsData(prev =>
+                        prev.filter(p => p.id !== deleteTarget.id)
+                    );
+
                     setDeleteOpen(false);
                     setDeleteTarget(null);
-
-                    // toast goes here later
                 },
             });
-        } else if (selectedRows.length) {
-            selectedRows.forEach(id => {
-                router.delete(products.destroy(id).url);
+
+            return;
+        }
+
+        if (selectedRows.length) {
+            const ids = [...selectedRows];
+
+            ids.forEach(id => {
+                router.delete(products.destroy(id).url, {
+                    preserveScroll: true,
+                });
             });
 
-            setDeleteOpen(false);
-            setSelectedRows([]);
+            setProductsData(prev =>
+                prev.filter(p => !ids.includes(p.id))
+            );
 
-            // toast goes here later
+            setSelectedRows([]);
+            setDeleteOpen(false);
         }
     };
 
@@ -165,8 +176,13 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
     const [bulkDelete, setBulkDelete] = useState(false);
+    const [productsData, setProductsData] = useState(productList.data);
+
+    useEffect(() => {
+        setProductsData(productList.data);
+    }, [productList.data]);
     const filteredProducts = useMemo(() => {
-        let data = [...productList.data];
+        let data = [...productsData];
         // Search
         data = data.filter(product =>
             product.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -188,7 +204,7 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
         }
 
         return data;
-    }, [search, statusFilter]);
+    }, [productsData, search, statusFilter]);
     return (
         <>
             <Head title="Products" />

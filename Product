@@ -1,0 +1,104 @@
+[90m= [39m[34;4mIlluminate\Database\Eloquent\Collection[39;24m {#7675
+    [34mall[39m: [
+      [34;4mApp\Models\Product[39;24m {#7700
+        [34mid[39m: [35m1[39m,
+        [34mname[39m: [32m"[39m[32mTHis is a product edit[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7701
+        [34mid[39m: [35m5[39m,
+        [34mname[39m: [32m"[39m[32mea consectetur[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7698
+        [34mid[39m: [35m6[39m,
+        [34mname[39m: [32m"[39m[32mperferendis sed[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7697
+        [34mid[39m: [35m7[39m,
+        [34mname[39m: [32m"[39m[32mnisi quia[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7696
+        [34mid[39m: [35m8[39m,
+        [34mname[39m: [32m"[39m[32mnisi et[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7695
+        [34mid[39m: [35m9[39m,
+        [34mname[39m: [32m"[39m[32mvoluptatem ad[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7694
+        [34mid[39m: [35m10[39m,
+        [34mname[39m: [32m"[39m[32matque commodi[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7693
+        [34mid[39m: [35m11[39m,
+        [34mname[39m: [32m"[39m[32mvoluptas numquam[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7692
+        [34mid[39m: [35m12[39m,
+        [34mname[39m: [32m"[39m[32msunt ducimus[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7691
+        [34mid[39m: [35m13[39m,
+        [34mname[39m: [32m"[39m[32mullam quia[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7690
+        [34mid[39m: [35m14[39m,
+        [34mname[39m: [32m"[39m[32mdicta temporibus[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7689
+        [34mid[39m: [35m15[39m,
+        [34mname[39m: [32m"[39m[32meius minus[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7688
+        [34mid[39m: [35m16[39m,
+        [34mname[39m: [32m"[39m[32mexpedita dolorum[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7687
+        [34mid[39m: [35m17[39m,
+        [34mname[39m: [32m"[39m[32mut non[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7686
+        [34mid[39m: [35m18[39m,
+        [34mname[39m: [32m"[39m[32meos laborum[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7685
+        [34mid[39m: [35m19[39m,
+        [34mname[39m: [32m"[39m[32mmolestias ut[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7684
+        [34mid[39m: [35m20[39m,
+        [34mname[39m: [32m"[39m[32moccaecati tenetur[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7683
+        [34mid[39m: [35m21[39m,
+        [34mname[39m: [32m"[39m[32msed dolorum[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7682
+        [34mid[39m: [35m22[39m,
+        [34mname[39m: [32m"[39m[32mlibero ut[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7681
+        [34mid[39m: [35m23[39m,
+        [34mname[39m: [32m"[39m[32meligendi incidunt[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7680
+        [34mid[39m: [35m24[39m,
+        [34mname[39m: [32m"[39m[32mnecessitatibus delectus[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7679
+        [34mid[39m: [35m25[39m,
+        [34mname[39m: [32m"[39m[32mcorrupti quo[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7678
+        [34mid[39m: [35m26[39m,
+        [34mname[39m: [32m"[39m[32matque est[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7677
+        [34mid[39m: [35m27[39m,
+        [34mname[39m: [32m"[39m[32mTHis is a product edit[39m[32m"[39m,
+      },
+      [34;4mApp\Models\Product[39;24m {#7676
+        [34mid[39m: [35m28[39m,
+        [34mname[39m: [32m"[39m[32mTHis is a product edit[39m[32m"[39m,
+      },
+    ],
+  }

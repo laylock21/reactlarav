@@ -69,7 +69,7 @@ class ProductController extends Controller
     {
         $product->delete();
 
-        return redirect()->back();  
+        return redirect()->route('products.index');
     }
     public function movements(Product $product)
     {
