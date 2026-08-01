@@ -1,8 +1,3 @@
-import AppLogo from "@/components/app-logo";
-import AppLogoIcon from "@/components/app-logo-icon";
-import { useSidebar } from "@/components/ui/sidebar";
-import { dashboard } from "@/routes";
-import products from "@/routes/products";
 import { Link } from "@inertiajs/react";
 import {
     LayoutGrid,
@@ -16,6 +11,8 @@ import {
     Settings,
 } from 'lucide-react';
 
+import AppLogo from "@/components/app-logo";
+import AppLogoIcon from "@/components/app-logo-icon";
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -29,6 +26,8 @@ import {
     SidebarMenuItem,
     SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { useSidebar } from "@/components/ui/sidebar";
+import { dashboard } from "@/routes";
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -41,6 +40,16 @@ const mainNavItems: NavItem[] = [
         title: "Products",
         href: "/products",
         icon: Package,
+        children: [
+            {
+                title: "Stock Movement",
+                href: "/products/movements",
+            },
+            {
+                title: "Archived",
+                href: "/products/archived",
+            },
+        ],
     },
     {
         title: "Categories",
@@ -84,6 +93,7 @@ const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     const { state, toggleSidebar } = useSidebar();
+
     return (
         <Sidebar collapsible="icon" variant="sidebar">
             <SidebarHeader>
