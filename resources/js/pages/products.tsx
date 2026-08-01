@@ -1,4 +1,5 @@
 import { Head, router } from "@inertiajs/react";
+import { toast } from "sonner";
 import products from "@/routes/products";
 import { Button } from "@/components/ui/button";
 import {
@@ -121,7 +122,16 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                     setOpen(false);
                     setEditingProduct(null);
                     setForm(emptyForm);
-                },
+
+                    toast.success("Changes saved.", {
+                        description: "The product has been updated successfully.",
+                    });
+                }, 
+                onError: () => {
+                    toast.error("Unable to update product.", {
+                        description: "There was an error while updating the product.",
+                    });
+                }
             });
         } else {
             router.post(products.store().url, form, {
@@ -130,7 +140,16 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                 onSuccess: () => {
                     setOpen(false);
                     setForm(emptyForm);
+
+                    toast.success("Product added successfully.", {
+                        description: "The product has been added successfully.",
+                    });
                 },
+                onError: () => {
+                    toast.error("Unable to add product.", {
+                        description: "There was an error while adding the product.",
+                    });
+                }
             });
         }
     };
@@ -146,7 +165,16 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
                     setDeleteOpen(false);
                     setDeleteTarget(null);
+
+                    toast.success("Product deleted successfully.", {
+                        description: "The product has been deleted successfully.",
+                    });
                 },
+                onError: () => {
+                    toast.error("Unable to delete product.", {
+                        description: "There was an error while deleting the product.",
+                    });
+                }
             });
 
             return;
@@ -167,6 +195,10 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
             setSelectedRows([]);
             setDeleteOpen(false);
+
+            toast.success(`${ids.length} products deleted successfully.`, {
+                description: "The selected products have been deleted successfully.",
+            });
         }
     };
 
@@ -283,6 +315,7 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem
                                             onClick={() => {
+                                                toast.success("Preparing CSV export...");
                                                 window.location.href = "/products/export/csv";
                                             }}
                                         >
@@ -291,6 +324,7 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
                                         <DropdownMenuItem
                                             onClick={() => {
+                                                toast.success("Preparing PDF export...");
                                                 window.location.href = "/products/export/pdf";
                                             }}
                                         >
@@ -466,7 +500,21 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
                                                         <DropdownMenuItem
                                                             onClick={() => {
-                                                                router.post(products.duplicate(product.id).url);
+                                                                router.post(products.duplicate(product.id).url, {}, {
+                                                                    preserveScroll: true,
+                                                                    onSuccess: () => {
+                                                                        setStatusOpen(false);
+                                                                        toast.success("Status updated.", {
+                                                                            description: `Changed to ${newStatus}.`,
+                                                                        });
+                                                                        router.reload({
+                                                                            only: ["products"],
+                                                                        });
+                                                                    },
+                                                                    onError: () => {
+                                                                        toast.error("Unable to update status.");
+                                                                    },
+                                                                });
                                                             }}
                                                         >
                                                             <Copy className="mr-2 h-4 w-4" />
@@ -479,7 +527,20 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
                                                         <DropdownMenuItem
                                                             onClick={() => {
-                                                                router.patch(products.archive(product.id).url);
+                                                                router.patch(products.archive(product.id).url, {}, {
+                                                                    preserveScroll: true,
+                                                                    onSuccess: () => {
+                                                                        toast.success("Product archived.", {
+                                                                            description: "The product has been moved to the archive.",
+                                                                        });
+                                                                        router.reload({
+                                                                            only: ["products"],
+                                                                        });
+                                                                    },
+                                                                    onError: () => {
+                                                                        toast.error("Unable to archive product.");
+                                                                    },
+                                                                });
                                                             }}
                                                         >
                                                             <Archive className="mr-2 h-4 w-4" />
