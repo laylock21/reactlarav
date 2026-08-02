@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 Route::inertia('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    
 
     Route::inertia('dashboard', 'dashboard')
         ->name('dashboard');
@@ -22,6 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         '/products/{product}/movements',
         [ProductController::class, 'movements']
     )->name('products.movements');
+    
+    Route::get('/stock-movement', [ProductController::class, 'movements'])
+    ->name('stock-movement');
 
     Route::post(
         '/products/{product}/duplicate',

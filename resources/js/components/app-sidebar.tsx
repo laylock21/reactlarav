@@ -33,7 +33,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { dashboard } from "@/routes";
+import { dashboard, stockMovement } from "@/routes";
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -49,7 +49,7 @@ const mainNavItems: NavItem[] = [
         children: [
             {
                 title: "Stock Movement",
-                href: "/products/movements",
+                href: stockMovement(),
             },
             {
                 title: "Archived",

@@ -40,4 +40,10 @@ class Product extends Model
     'archived',
     'description',
 ];
+
+    public function movements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
 }
+

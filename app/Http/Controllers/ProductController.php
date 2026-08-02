@@ -7,6 +7,8 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\StockMovementService;
+use App\Models\StockMovement;
 
 class ProductController extends Controller
 {
@@ -16,6 +18,17 @@ class ProductController extends Controller
             'products' => Product::paginate(100),
         ]);
     }
+    public function movements()
+    {
+        $movements = StockMovement::with(['product', 'user'])
+            ->latest()
+            ->paginate(15);
+
+        return Inertia::render('stock-movement/index', [
+            'movements' => $movements,
+        ]);
+    }
+    
     public function exportPdf()
     {
         $products = Product::all();
@@ -45,7 +58,16 @@ class ProductController extends Controller
             'description' => 'nullable',
         ]);
 
-        Product::create($validated);
+        $product = Product::create($validated);
+
+        StockMovementService::record(
+            product: $product,
+            type: 'CREATED',
+            quantity: $product->quantity,
+            before: 0,
+            after: $product->quantity,
+            remarks: 'New product created.'
+        );
 
         return redirect()->back();
     }
@@ -72,8 +94,19 @@ class ProductController extends Controller
             'description' => 'nullable',
         ]);
 
+        $before = $product->quantity;
+
         $product->fill($validated);
         $product->save();
+
+        StockMovementService::record(
+            product: $product,
+            type: 'EDITED',
+            quantity: 0,
+            before: $before,
+            after: $product->quantity,
+            remarks: 'Product information updated.'
+        );
 
         return to_route('products.index');
     }
@@ -128,10 +161,6 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('products.index');
-    }
-    public function movements(Product $product)
-    {
-        //
     }
 
     public function duplicate(Product $product)
