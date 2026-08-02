@@ -280,8 +280,9 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                 {/* Filter */}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="icon">
-                                            <Filter className="h-4 w-4" />
+                                        <Button variant="outline">
+                                            <Filter className="mr-2 h-4 w-4" />
+                                            Filter
                                         </Button>
                                     </DropdownMenuTrigger>
 
@@ -307,11 +308,12 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                 {/* Import */}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="icon">
-                                            <Upload className="h-4 w-4" />
+                                        <Button variant="outline">
+                                            <Upload className="mr-2 h-4 w-4" />
+                                            Export
                                         </Button>
                                     </DropdownMenuTrigger>
-
+ 
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem
                                             onClick={() => {
@@ -336,7 +338,6 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                 {/* Delete */}
                                 <Button
                                     variant="outline"
-                                    size="icon"
                                     disabled={selectedRows.length === 0}
                                     onClick={() => {
                                         setBulkDelete(true);
@@ -344,19 +345,20 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                         setDeleteOpen(true);
                                     }}
                                 >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>   
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                </Button>
 
                                 {/* Add Product */}
                                 <Button
-                                    size="icon"
                                     onClick={() => {
                                         setEditingProduct(null);
                                         setForm(emptyForm);
                                         setOpen(true);
                                     }}
                                 >
-                                    <Plus className="h-4 w-4" />
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Add Product
                                 </Button>
 
                             </div>

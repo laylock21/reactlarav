@@ -27,7 +27,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
             }
         });
 
-        return state;
+        return state; 
     });
 
     return (
@@ -69,6 +69,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
 
                                     router.visit(item.href);
                                 }}
+                                tooltip={{ children: item.title }}
                             >
                                 <div className="flex items-center gap-2">
                                     {item.icon && <item.icon />}

@@ -1,4 +1,5 @@
 import { Link } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import {
     LayoutGrid,
     Package,
@@ -27,6 +28,11 @@ import {
     SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { useSidebar } from "@/components/ui/sidebar";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { dashboard } from "@/routes";
 import type { NavItem } from '@/types';
 
@@ -92,34 +98,61 @@ const footerNavItems: NavItem[] = [];
 
 
 export function AppSidebar() {
-    const { state, toggleSidebar } = useSidebar();
+    const { state, toggleSidebar, isMobile } = useSidebar();
 
     return (
         <Sidebar collapsible="icon" variant="sidebar">
             <SidebarHeader>
-                <div className="flex items-center justify-between px-2">
+                <div className="flex items-center justify-between px-0">
 
                     {state === "expanded" ? (
                         <>
                             <SidebarMenu className="flex-1">
                                 <SidebarMenuItem>
-                                    <SidebarMenuButton size="lg" asChild>
-                                        <Link href={dashboard()} prefetch>
-                                            <AppLogo />
-                                        </Link>
-                                    </SidebarMenuButton>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <SidebarMenuButton size="lg" asChild>
+                                                <button
+                                                    onClick={() => router.reload()}
+                                                    className="flex items-center"
+                                                >
+                                                    <AppLogo />
+                                                </button>
+                                            </SidebarMenuButton>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="right" align="center" hidden={state !== "expanded" || isMobile}>
+                                            Refresh
+                                        </TooltipContent>
+                                    </Tooltip>
                                 </SidebarMenuItem>
                             </SidebarMenu>
 
                             <SidebarTrigger />
                         </>
                     ) : (
-                        <button
-                            onClick={toggleSidebar}
-                            className="flex h-10 w-full items-center justify-center rounded-md hover:bg-sidebar-accent"
-                        >
-                            <AppLogoIcon className="h-6 w-6" />
-                        </button>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    onClick={toggleSidebar}
+                                    className="
+                                        flex
+                                        h-10
+                                        w-10
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-md
+                                        mx-auto
+                                        hover:bg-sidebar-accent
+                                    "
+                                >
+                                    <AppLogoIcon className="size-4" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" align="center" hidden={state !== "collapsed" || isMobile}>
+                                Open
+                            </TooltipContent>
+                        </Tooltip>
                     )}
 
                 </div>
