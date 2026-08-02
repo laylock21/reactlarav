@@ -17,7 +17,7 @@ class ProductFactory extends Factory
 
         return [
 
-            'sku' => strtoupper(fake()->bothify('P###')),
+            'sku' => 'P' . str_pad($this->faker->unique()->numberBetween(1, 999999), 6, '0', STR_PAD_LEFT),
 
             'barcode' => fake()->ean13(),
 
