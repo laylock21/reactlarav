@@ -217,24 +217,43 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
     }, [productList.data]);
     const filteredProducts = useMemo(() => {
         let data = [...productsData];
-        // Search
-        data = data.filter(product =>
-            product.name.toLowerCase().includes(search.toLowerCase()) ||
-            product.sku.toLowerCase().includes(search.toLowerCase()) ||
-            product.supplier.toLowerCase().includes(search.toLowerCase())
-        );
 
-        // Status filter
-        if (statusFilter === "Delivered") {
-            data = data.filter(product => product.status === "Delivered");
+        const keyword = search.trim().toLowerCase();
+
+        if (keyword !== "") {
+            data = data.filter((product) =>
+                [
+                    product.name,
+                    product.sku,
+                    product.supplier,
+                    product.category,
+                    product.barcode ?? "",
+                    product.status,
+                ]
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(keyword)
+            );
         }
 
-        if (statusFilter === "Pending") {
-            data = data.filter(product => product.status === "Pending");
-        }
+        switch (statusFilter) {
+            case "Delivered":
+                data = data.filter(
+                    (product) => product.status === "Delivered"
+                );
+                break;
 
-        if (statusFilter === "Low Stock") {
-            data = data.filter(product => product.quantity <= 10);
+            case "Pending":
+                data = data.filter(
+                    (product) => product.status === "Pending"
+                );
+                break;
+
+            case "Low Stock":
+                data = data.filter(
+                    (product) => product.quantity <= product.minimum_stock
+                );
+                break;
         }
 
         return data;
@@ -242,7 +261,6 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
     return (
         <>
             <Head title="Products" />
-
             <div className="space-y-6 p-6 h-screen flex flex-col overflow-hidden">
 
                 <div className="flex items-center justify-between">
@@ -270,7 +288,21 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                     placeholder="Search products..."
                                     className="pl-9"
                                     value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        setSearch(value);
+
+                                        router.get(
+                                            "/products",
+                                            { search: value },
+                                            {
+                                                preserveState: true,
+                                                preserveScroll: true,
+                                                replace: true,
+                                            }
+                                        );
+                                    }}
                                 />
                             </div>
 

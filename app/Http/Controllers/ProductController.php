@@ -12,10 +12,26 @@ use App\Models\StockMovement;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $products = Product::query()
+
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('supplier', 'like', "%{$search}%");
+                });
+            })
+
+            ->paginate(100)
+            ->withQueryString();
+
         return Inertia::render('products', [
-            'products' => Product::paginate(100),
+            'products' => $products,
+            'filters' => [
+                'search' => $request->search,
+            ],
         ]);
     }
     public function movements()
