@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductMovement;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -40,7 +41,7 @@ class ProductController extends Controller
             ->latest()
             ->paginate(15);
 
-        return Inertia::render('stock-movement/index', [
+        return Inertia::render('stock-movement', [
             'movements' => $movements,
         ]);
     }
@@ -188,6 +189,16 @@ class ProductController extends Controller
         $copy->barcode = null;
 
         $copy->save();
+
+        ProductMovement::create([
+            'product_id' => $copy->id,
+            'user_id' => auth()->id(),
+            'type' => 'DUPLICATED',
+            'quantity' => 0,
+            'before_quantity' => $product->quantity,
+            'after_quantity' => $copy->quantity,
+            'remarks' => 'Duplicated from SKU: ' . $product->sku,
+        ]);
 
         return redirect()->back();
     }

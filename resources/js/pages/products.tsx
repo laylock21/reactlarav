@@ -370,15 +370,32 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                                 {/* Delete */}
                                 <Button
                                     variant="outline"
+                                    size="sm"
                                     disabled={selectedRows.length === 0}
                                     onClick={() => {
                                         setBulkDelete(true);
                                         setDeleteTarget(null);
                                         setDeleteOpen(true);
                                     }}
+                                    className="transition-colors duration-300 ease-out"
                                 >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete
+                                    <Trash2
+                                        className={`mr-2 h-4 w-4 transition-all duration-200 ${
+                                            selectedRows.length > 0
+                                                ? "text-red-600 scale-100"
+                                                : "text-muted-foreground scale-95"
+                                        }`}
+                                    />
+
+                                    <span
+                                        className={`transition-all duration-200 ${
+                                            selectedRows.length > 0
+                                                ? "text-red-600 scale-100"
+                                                : "text-muted-foreground scale-95"
+                                        }`}
+                                    >
+                                        Delete
+                                    </span>
                                 </Button>
 
                                 {/* Add Product */}
@@ -525,21 +542,12 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
 
                                                         <DropdownMenuItem
                                                             onClick={() => {
-                                                                router.get(products.movements(product.id).url);
-                                                            }}
-                                                        >
-                                                            <Package className="mr-2 h-4 w-4" />
-                                                            Stock Movement
-                                                        </DropdownMenuItem>
-
-                                                        <DropdownMenuItem
-                                                            onClick={() => {
                                                                 router.post(products.duplicate(product.id).url, {}, {
                                                                     preserveScroll: true,
                                                                     onSuccess: () => {
                                                                         setStatusOpen(false);
                                                                         toast.success("Status updated.", {
-                                                                            description: `Changed to ${newStatus}.`,
+                                                                            description: `Changed ${product.name} successfully.`,
                                                                         });
                                                                         router.reload({
                                                                             only: ["products"],

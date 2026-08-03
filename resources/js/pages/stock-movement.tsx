@@ -1,7 +1,7 @@
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { useMemo, useState } from "react";
 
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,9 @@ import {
     Pencil,
     Archive,
     Package,
+    Copy,
+    Plus,
+    ArrowLeft,
 } from "lucide-react";
 
 type Movement = {
@@ -33,6 +36,7 @@ type Movement = {
     created_at: string;
 
     product: {
+        id: number;
         name: string;
         sku: string;
     };
@@ -46,14 +50,28 @@ type Props = {
     movements: {
         data: Movement[];
     };
+
+    product?: {
+        id: number;
+        name: string;
+    } | null;
 };
 
-export default function StockMovement({ movements }: Props) {
+export default function StockMovement({
+    movements,
+    product,
+}: Props) {
     const [search, setSearch] = useState("");
 
     const [filter, setFilter] = useState<
-        "all" | "CREATED" | "EDITED" | "ARCHIVED" | "STOCK_IN" | "STOCK_OUT"
-    >("all");
+        | "all"
+        | "CREATED"
+        | "EDITED"
+        | "ARCHIVED"
+        | "DUPLICATED"
+        | "STOCK_IN"
+        | "STOCK_OUT"
+    >("all");  
 
     const filteredMovements = useMemo(() => {
         let data = [...movements.data];
@@ -83,8 +101,14 @@ export default function StockMovement({ movements }: Props) {
             case "EDITED":
                 return "bg-yellow-500";
 
+            case "DUPLICATED":
+                return "bg-violet-600";
+
             case "ARCHIVED":
                 return "bg-gray-600";
+
+            case "DUPLICATED":
+                return "bg-purple-600";
 
             case "STOCK_IN":
                 return "bg-blue-600";
@@ -106,19 +130,48 @@ export default function StockMovement({ movements }: Props) {
 
             <div className="space-y-6 p-6">
 
-                <div>
-                    <h1 className="text-3xl font-bold">
-                        Stock Movement
-                    </h1>
+                <div className="flex items-center justify-between">
 
-                    <p className="text-muted-foreground">
-                        Complete inventory ledger and transaction history.
-                    </p>
+                    <div>
+
+                        <h1 className="text-3xl font-bold">
+                            {product
+                                ? `${product.name} History`
+                                : "Stock Movement"}
+                        </h1>
+
+                        <p className="text-muted-foreground">
+                            {product
+                                ? "Complete history of this product."
+                                : "Complete inventory ledger and transaction history."}
+                        </p>
+
+                    </div>
+
+                    {product && (
+
+                        <Button
+                            asChild
+                            variant="outline"
+                        >
+
+                            <Link href="/stock-movement">
+
+                                <ArrowLeft className="mr-2 h-4 w-4"/>
+
+                                Back to Ledger
+
+                            </Link>
+
+                        </Button>
+
+                    )}
+
                 </div>
 
                 {/* Statistics */}
 
-                <div className="grid gap-4 md:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-6">
 
                     <Card>
 
@@ -127,7 +180,7 @@ export default function StockMovement({ movements }: Props) {
                             <div>
 
                                 <p className="text-sm text-muted-foreground">
-                                    Total Records
+                                    Records
                                 </p>
 
                                 <h2 className="text-3xl font-bold">
@@ -136,7 +189,7 @@ export default function StockMovement({ movements }: Props) {
 
                             </div>
 
-                            <Package className="h-8 w-8 text-muted-foreground" />
+                            <Package className="h-8 w-8 text-muted-foreground"/>
 
                         </CardContent>
 
@@ -164,7 +217,7 @@ export default function StockMovement({ movements }: Props) {
 
                             </div>
 
-                            <ArrowDownToLine className="h-8 w-8 text-green-600" />
+                            <ArrowDownToLine className="h-8 w-8 text-green-600"/>
 
                         </CardContent>
 
@@ -192,7 +245,7 @@ export default function StockMovement({ movements }: Props) {
 
                             </div>
 
-                            <ArrowUpFromLine className="h-8 w-8 text-red-600" />
+                            <ArrowUpFromLine className="h-8 w-8 text-red-600"/>
 
                         </CardContent>
 
@@ -205,7 +258,7 @@ export default function StockMovement({ movements }: Props) {
                             <div>
 
                                 <p className="text-sm text-muted-foreground">
-                                    Product Edits
+                                    Edited
                                 </p>
 
                                 <h2 className="text-3xl font-bold text-yellow-500">
@@ -220,7 +273,63 @@ export default function StockMovement({ movements }: Props) {
 
                             </div>
 
-                            <Pencil className="h-8 w-8 text-yellow-500" />
+                            <Pencil className="h-8 w-8 text-yellow-500"/>
+
+                        </CardContent>
+
+                    </Card>
+
+                    <Card>
+
+                        <CardContent className="flex items-center justify-between pt-6">
+
+                            <div>
+
+                                <p className="text-sm text-muted-foreground">
+                                    Duplicated
+                                </p>
+
+                                <h2 className="text-3xl font-bold text-violet-600">
+
+                                    {
+                                        movements.data.filter(
+                                            m => m.type === "DUPLICATED"
+                                        ).length
+                                    }
+
+                                </h2>
+
+                            </div>
+
+                            <Copy className="h-8 w-8 text-violet-600"/>
+
+                        </CardContent>
+
+                    </Card>
+
+                    <Card>
+
+                        <CardContent className="flex items-center justify-between pt-6">
+
+                            <div>
+
+                                <p className="text-sm text-muted-foreground">
+                                    Archived
+                                </p>
+
+                                <h2 className="text-3xl font-bold text-gray-600">
+
+                                    {
+                                        movements.data.filter(
+                                            m => m.type === "ARCHIVED"
+                                        ).length
+                                    }
+
+                                </h2>
+
+                            </div>
+
+                            <Archive className="h-8 w-8 text-gray-600"/>
 
                         </CardContent>
 
@@ -282,6 +391,10 @@ export default function StockMovement({ movements }: Props) {
 
                                     <DropdownMenuItem onClick={() => setFilter("ARCHIVED")}>
                                         Archived
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuItem onClick={() => setFilter("DUPLICATED")}>
+                                        Duplicated
                                     </DropdownMenuItem>
 
                                     <DropdownMenuItem onClick={() => setFilter("STOCK_IN")}>
@@ -349,20 +462,14 @@ export default function StockMovement({ movements }: Props) {
                                     </thead>
 
                                     <tbody>
-
                                         {filteredMovements.map((movement) => (
-
                                             <tr
                                                 key={movement.id}
                                                 className="border-t transition-colors hover:bg-muted/40"
                                             >
-
                                                 {/* Product */}
-
                                                 <td className="p-3">
-
                                                     <div className="space-y-1">
-
                                                         <p className="font-medium">
                                                             {movement.product.name}
                                                         </p>
@@ -370,17 +477,12 @@ export default function StockMovement({ movements }: Props) {
                                                         <Badge variant="secondary">
                                                             {movement.product.sku}
                                                         </Badge>
-
                                                     </div>
-
                                                 </td>
 
                                                 {/* Action */}
-
                                                 <td className="p-3">
-
                                                     <Badge className={badgeColor(movement.type)}>
-
                                                         {movement.type === "STOCK_IN" && (
                                                             <ArrowDownToLine className="mr-1 h-3 w-3" />
                                                         )}
@@ -397,16 +499,16 @@ export default function StockMovement({ movements }: Props) {
                                                             <Archive className="mr-1 h-3 w-3" />
                                                         )}
 
+                                                        {movement.type === "DUPLICATED" && (
+                                                            <Copy className="mr-1 h-3 w-3" />
+                                                        )}
+
                                                         {prettyAction(movement.type)}
-
                                                     </Badge>
-
                                                 </td>
 
-                                                {/* Quantity Changed */}
-
+                                                {/* Quantity Change */}
                                                 <td className="p-3 font-semibold">
-
                                                     {movement.type === "STOCK_IN" && (
                                                         <span className="text-green-600">
                                                             +{movement.quantity}
@@ -425,41 +527,32 @@ export default function StockMovement({ movements }: Props) {
                                                                 —
                                                             </span>
                                                         )}
-
                                                 </td>
 
                                                 {/* Before */}
-
                                                 <td className="p-3 text-muted-foreground">
                                                     {movement.before_quantity}
                                                 </td>
 
                                                 {/* After */}
-
                                                 <td className="p-3 font-semibold">
                                                     {movement.after_quantity}
                                                 </td>
 
                                                 {/* User */}
-
                                                 <td className="p-3">
                                                     {movement.user?.name ?? "System"}
                                                 </td>
 
                                                 {/* Date */}
-
                                                 <td className="p-3 whitespace-nowrap">
-
                                                     {new Date(
                                                         movement.created_at
                                                     ).toLocaleString()}
-
                                                 </td>
 
                                                 {/* Remarks */}
-
                                                 <td className="p-3 max-w-xs">
-
                                                     {movement.remarks ? (
                                                         movement.remarks
                                                     ) : (
@@ -467,15 +560,10 @@ export default function StockMovement({ movements }: Props) {
                                                             —
                                                         </span>
                                                     )}
-
                                                 </td>
-
                                             </tr>
-
                                         ))}
-
                                     </tbody>
-
                                 </table>
 
                             </div>
