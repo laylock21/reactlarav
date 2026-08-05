@@ -42,6 +42,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         [ProductController::class, 'archive'
     ])->name('products.archive');
 
+    Route::patch(
+        '/products/{product}/adjust-stock',
+        [ProductController::class, 'adjustStock']
+    )->name('products.adjust-stock');
 });
 
 require __DIR__.'/settings.php';

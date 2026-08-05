@@ -1,10 +1,17 @@
 import { Head, Link } from "@inertiajs/react";
 import { useMemo, useState } from "react";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+} from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
+import { StockMovementViewDialog } from "@/components/stock-movement-view-dialog";
 
 import {
     DropdownMenu,
@@ -16,6 +23,7 @@ import {
 import {
     Search,
     Filter,
+    History,
     ArrowDownToLine,
     ArrowUpFromLine,
     Pencil,
@@ -24,7 +32,25 @@ import {
     Copy,
     Plus,
     ArrowLeft,
+    Eye,
+    ArrowRight,
+    ArrowUpDown,
 } from "lucide-react";
+
+type ProductSnapshot = {
+    sku?: string;
+    barcode?: string;
+    name?: string;
+    supplier?: string;
+    category?: string;
+    unit?: string;
+    quantity?: number;
+    minimum_stock?: number;
+    cost_price?: number;
+    selling_price?: number;
+    status?: string;
+    description?: string;
+};
 
 type Movement = {
     id: number;
@@ -34,6 +60,9 @@ type Movement = {
     after_quantity: number;
     remarks: string | null;
     created_at: string;
+
+    before_data?: ProductSnapshot | null;
+    after_data?: ProductSnapshot | null;
 
     product: {
         id: number;
@@ -61,7 +90,14 @@ export default function StockMovement({
     movements,
     product,
 }: Props) {
+
     const [search, setSearch] = useState("");
+    const [selectedMovement, setSelectedMovement] =
+        useState<Movement | null>(null);
+    const [showPrevious, setShowPrevious] = 
+        useState<Record<string, boolean>>({});
+
+    const [viewOpen, setViewOpen] = useState(false);
 
     const [filter, setFilter] = useState<
         | "all"
@@ -71,13 +107,14 @@ export default function StockMovement({
         | "DUPLICATED"
         | "STOCK_IN"
         | "STOCK_OUT"
-    >("all");  
+        | "STOCK_ADJUSTMENT"
+    >("all");
 
     const filteredMovements = useMemo(() => {
         let data = [...movements.data];
 
         data = data.filter(
-            (movement) =>
+            movement =>
                 movement.product.name
                     .toLowerCase()
                     .includes(search.toLowerCase()) ||
@@ -87,7 +124,7 @@ export default function StockMovement({
         );
 
         if (filter !== "all") {
-            data = data.filter((m) => m.type === filter);
+            data = data.filter(m => m.type === filter);
         }
 
         return data;
@@ -95,35 +132,35 @@ export default function StockMovement({
 
     const badgeColor = (type: string) => {
         switch (type) {
+
             case "CREATED":
                 return "bg-green-600";
 
             case "EDITED":
                 return "bg-yellow-500";
 
-            case "DUPLICATED":
-                return "bg-violet-600";
-
             case "ARCHIVED":
                 return "bg-gray-600";
 
             case "DUPLICATED":
-                return "bg-purple-600";
+                return "bg-violet-600";
 
             case "STOCK_IN":
                 return "bg-blue-600";
 
             case "STOCK_OUT":
                 return "bg-red-600";
+            
+            case "STOCK_ADJUSTMENT":
+                return "bg-orange-500";
 
             default:
                 return "";
         }
     };
-
+    
     const prettyAction = (type: string) =>
         type.replaceAll("_", " ");
-
     return (
         <>
             <Head title="Stock Movement" />
@@ -405,6 +442,11 @@ export default function StockMovement({
                                         Stock Out
                                     </DropdownMenuItem>
 
+                                    <DropdownMenuItem onClick={() => setFilter("STOCK_ADJUSTMENT")}
+                                    >
+                                        Stock Adjustment
+                                    </DropdownMenuItem>
+
                                 </DropdownMenuContent>
 
                             </DropdownMenu>
@@ -427,6 +469,10 @@ export default function StockMovement({
 
                                             <th className="p-3 text-left">
                                                 Product
+                                            </th>
+
+                                            <th className="p-3 text-left">
+                                                View
                                             </th>
 
                                             <th className="p-3 text-left">
@@ -462,14 +508,20 @@ export default function StockMovement({
                                     </thead>
 
                                     <tbody>
+
                                         {filteredMovements.map((movement) => (
+
                                             <tr
                                                 key={movement.id}
                                                 className="border-t transition-colors hover:bg-muted/40"
                                             >
+
                                                 {/* Product */}
+
                                                 <td className="p-3">
+
                                                     <div className="space-y-1">
+
                                                         <p className="font-medium">
                                                             {movement.product.name}
                                                         </p>
@@ -477,12 +529,33 @@ export default function StockMovement({
                                                         <Badge variant="secondary">
                                                             {movement.product.sku}
                                                         </Badge>
+
                                                     </div>
+
                                                 </td>
 
                                                 {/* Action */}
+
                                                 <td className="p-3">
+
                                                     <Badge className={badgeColor(movement.type)}>
+
+                                                        {movement.type === "CREATED" && (
+                                                            <Plus className="mr-1 h-3 w-3" />
+                                                        )}
+
+                                                        {movement.type === "EDITED" && (
+                                                            <Pencil className="mr-1 h-3 w-3" />
+                                                        )}
+
+                                                        {movement.type === "DUPLICATED" && (
+                                                            <Copy className="mr-1 h-3 w-3" />
+                                                        )}
+
+                                                        {movement.type === "ARCHIVED" && (
+                                                            <Archive className="mr-1 h-3 w-3" />
+                                                        )}
+
                                                         {movement.type === "STOCK_IN" && (
                                                             <ArrowDownToLine className="mr-1 h-3 w-3" />
                                                         )}
@@ -491,78 +564,124 @@ export default function StockMovement({
                                                             <ArrowUpFromLine className="mr-1 h-3 w-3" />
                                                         )}
 
-                                                        {movement.type === "EDITED" && (
-                                                            <Pencil className="mr-1 h-3 w-3" />
-                                                        )}
-
-                                                        {movement.type === "ARCHIVED" && (
-                                                            <Archive className="mr-1 h-3 w-3" />
-                                                        )}
-
-                                                        {movement.type === "DUPLICATED" && (
-                                                            <Copy className="mr-1 h-3 w-3" />
-                                                        )}
-
                                                         {prettyAction(movement.type)}
+
                                                     </Badge>
+
                                                 </td>
 
-                                                {/* Quantity Change */}
+                                                {/* Quantity */}
+
                                                 <td className="p-3 font-semibold">
+
                                                     {movement.type === "STOCK_IN" && (
+
                                                         <span className="text-green-600">
+
                                                             +{movement.quantity}
+
                                                         </span>
+
                                                     )}
 
                                                     {movement.type === "STOCK_OUT" && (
+
                                                         <span className="text-red-600">
+
                                                             -{movement.quantity}
+
                                                         </span>
+
                                                     )}
 
                                                     {movement.type !== "STOCK_IN" &&
                                                         movement.type !== "STOCK_OUT" && (
-                                                            <span className="text-muted-foreground">
-                                                                —
-                                                            </span>
-                                                        )}
+
+                                                        <span className="text-muted-foreground">
+
+                                                            —
+
+                                                        </span>
+
+                                                    )}
+
+                                                    {movement.type === "STOCK_ADJUSTMENT" && (
+                                                        <ArrowUpDown className="mr-1 h-3 w-3" />
+                                                    )}
+
                                                 </td>
 
                                                 {/* Before */}
+
                                                 <td className="p-3 text-muted-foreground">
+
                                                     {movement.before_quantity}
+
                                                 </td>
 
                                                 {/* After */}
+
                                                 <td className="p-3 font-semibold">
+
                                                     {movement.after_quantity}
+
                                                 </td>
 
                                                 {/* User */}
+
                                                 <td className="p-3">
+
                                                     {movement.user?.name ?? "System"}
+
                                                 </td>
 
                                                 {/* Date */}
+
                                                 <td className="p-3 whitespace-nowrap">
+
                                                     {new Date(
                                                         movement.created_at
                                                     ).toLocaleString()}
+
                                                 </td>
 
                                                 {/* Remarks */}
+
                                                 <td className="p-3 max-w-xs">
-                                                    {movement.remarks ? (
-                                                        movement.remarks
-                                                    ) : (
-                                                        <span className="text-muted-foreground">
-                                                            —
-                                                        </span>
-                                                    )}
+
+                                                    {movement.remarks ?? "—"}
+
                                                 </td>
+
+                                                {/* NEW VIEW BUTTON */}
+
+                                                <td className="p-3">
+
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="gap-2"
+                                                        onClick={() => {
+
+                                                            setSelectedMovement(movement);
+                                                            setShowPrevious({});
+                                                            setViewOpen(true);
+
+                                                        }}
+                                                    >
+
+                                                        <Eye className="mr-2 h-4 w-4" />
+
+                                                        View Details
+
+                                                    </Button>
+
+                                                </td>
+
                                             </tr>
+
                                         ))}
+
                                     </tbody>
                                 </table>
 
@@ -575,6 +694,14 @@ export default function StockMovement({
                 </Card>
 
             </div>
+
+            <StockMovementViewDialog
+                open={viewOpen}
+                onOpenChange={setViewOpen}
+                movement={selectedMovement}
+                showPrevious={showPrevious}
+                setShowPrevious={setShowPrevious}
+            />
 
         </>
     );

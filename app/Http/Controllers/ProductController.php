@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\ProductMovement;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -111,19 +110,25 @@ class ProductController extends Controller
             'description' => 'nullable',
         ]);
 
-        $before = $product->quantity;
+        $beforeQuantity = $product->quantity;
+
+        // Save the product before editing
+        $beforeData = $product->toArray();
 
         $product->fill($validated);
         $product->save();
 
-        StockMovementService::record(
-            product: $product,
-            type: 'EDITED',
-            quantity: 0,
-            before: $before,
-            after: $product->quantity,
-            remarks: 'Product information updated.'
-        );
+        StockMovement::create([
+            'product_id' => $product->id,
+            'user_id' => auth()->id(),
+            'type' => 'EDITED',
+            'quantity' => 0,
+            'before_quantity' => $beforeQuantity,
+            'after_quantity' => $product->quantity,
+            'before_data' => $beforeData,
+            'after_data' => $product->fresh()->toArray(),
+            'remarks' => 'Product information updated.',
+        ]);
 
         return to_route('products.index');
     }
@@ -185,19 +190,20 @@ class ProductController extends Controller
         $copy = $product->replicate();
 
         $copy->sku = $product->sku . '-COPY-' . now()->timestamp;
-
         $copy->barcode = null;
 
         $copy->save();
 
-        ProductMovement::create([
+        StockMovement::create([
             'product_id' => $copy->id,
             'user_id' => auth()->id(),
             'type' => 'DUPLICATED',
             'quantity' => 0,
             'before_quantity' => $product->quantity,
             'after_quantity' => $copy->quantity,
-            'remarks' => 'Duplicated from SKU: ' . $product->sku,
+            'before_data' => $product->toArray(),
+            'after_data' => $copy->toArray(),
+            'remarks' => 'Duplicated from SKU: '.$product->sku,
         ]);
 
         return redirect()->back();
@@ -213,10 +219,80 @@ class ProductController extends Controller
 
         return back();
     }
+
+    public function adjustStock(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:increase,decrease',
+            'quantity' => 'required|integer|min:1',
+            'reason' => 'required|string|max:255',
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $before = $product->quantity;
+
+        if ($validated['type'] === 'increase') {
+
+            $after = $before + $validated['quantity'];
+
+        } else {
+
+            $after = max(0, $before - $validated['quantity']);
+
+        }
+
+        $product->update([
+            'quantity' => $after,
+        ]);
+
+        StockMovement::create([
+            'product_id' => $product->id,
+            'user_id' => auth()->id(),
+
+            'type' => 'STOCK_ADJUSTMENT',
+
+            'quantity' => $validated['quantity'],
+
+            'before_quantity' => $before,
+
+            'after_quantity' => $after,
+
+            'remarks' =>
+                $validated['reason'] .
+                ($validated['remarks']
+                    ? ' - ' . $validated['remarks']
+                    : ''),
+
+            'before_data' => [
+                'quantity' => $before,
+            ],
+
+            'after_data' => [
+                'quantity' => $after,
+            ],
+        ]);
+
+        return back();
+    }
+
     public function archive(Product $product)
     {
+        $beforeData = $product->toArray();
+
         $product->update([
             'archived' => true,
+        ]);
+
+        StockMovement::create([
+            'product_id' => $product->id,
+            'user_id' => auth()->id(),
+            'type' => 'ARCHIVED',
+            'quantity' => 0,
+            'before_quantity' => $product->quantity,
+            'after_quantity' => $product->quantity,
+            'before_data' => $beforeData,
+            'after_data' => $product->fresh()->toArray(),
+            'remarks' => 'Product archived.',
         ]);
 
         return redirect()->back();

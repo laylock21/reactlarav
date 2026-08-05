@@ -13,7 +13,14 @@ class StockMovement extends Model
         'quantity',
         'before_quantity',
         'after_quantity',
+        'before_data',
+        'after_data',
         'remarks',
+    ];
+        
+    protected $casts = [
+        'before_data' => 'array',
+        'after_data' => 'array',
     ];
 
     public function product()
