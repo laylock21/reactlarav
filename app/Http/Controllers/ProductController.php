@@ -44,6 +44,52 @@ class ProductController extends Controller
             'movements' => $movements,
         ]);
     }
+
+    public function revertMovements(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'required|integer|exists:stock_movements,id',
+        ]);
+
+        $movements = StockMovement::with('product')
+            ->whereIn('id', $validated['ids'])
+            ->get();
+
+        foreach ($movements as $movement) {
+            if ($movement->type !== 'EDITED' || ! $movement->before_data) {
+                continue;
+            }
+
+            $product = $movement->product;
+            if (! $product) {
+                continue;
+            }
+
+            $currentState = $product->toArray();
+            $beforeData = array_intersect_key(
+                $movement->before_data,
+                array_flip($product->getFillable())
+            );
+
+            $product->fill($beforeData);
+            $product->save();
+
+            StockMovement::create([
+                'product_id' => $product->id,
+                'user_id' => auth()->id(),
+                'type' => 'EDITED',
+                'quantity' => 0,
+                'before_quantity' => $currentState['quantity'] ?? 0,
+                'after_quantity' => $product->quantity,
+                'before_data' => $currentState,
+                'after_data' => $product->fresh()->toArray(),
+                'remarks' => 'Reverted edited stock movement #' . $movement->id,
+            ]);
+        }
+
+        return back();
+    }
     
     public function exportPdf()
     {

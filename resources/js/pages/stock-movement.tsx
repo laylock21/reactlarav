@@ -1,4 +1,4 @@
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, router } from "@inertiajs/react";
 import { useMemo, useState } from "react";
 
 import {
@@ -10,6 +10,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 import { StockMovementViewDialog } from "@/components/stock-movement-view-dialog";
 
@@ -35,6 +44,7 @@ import {
     Eye,
     ArrowRight,
     ArrowUpDown,
+    RotateCcw,
 } from "lucide-react";
 
 type ProductSnapshot = {
@@ -98,6 +108,8 @@ export default function StockMovement({
         useState<Record<string, boolean>>({});
 
     const [viewOpen, setViewOpen] = useState(false);
+    const [selectedRows, setSelectedRows] = useState<number[]>([]);
+    const [revertOpen, setRevertOpen] = useState(false);
 
     const [filter, setFilter] = useState<
         | "all"
@@ -161,11 +173,63 @@ export default function StockMovement({
     
     const prettyAction = (type: string) =>
         type.replaceAll("_", " ");
+
+    const editableMovements = filteredMovements.filter(
+        (movement) => movement.type === "EDITED"
+    );
+
+    const allEditedSelected =
+        editableMovements.length > 0 &&
+        selectedRows.length === editableMovements.length;
+
+    const toggleRowSelection = (
+        checked: boolean | "indeterminate",
+        movementId: number
+    ) => {
+        if (checked) {
+            setSelectedRows((prev) => [...new Set([...prev, movementId])]);
+            return;
+        }
+
+        setSelectedRows((prev) => prev.filter((id) => id !== movementId));
+    };
+
+    const toggleSelectAllEdited = () => {
+        if (allEditedSelected) {
+            setSelectedRows([]);
+            return;
+        }
+
+        setSelectedRows(editableMovements.map((movement) => movement.id));
+    };
+
+    const revertMovements = (ids: number[]) => {
+        if (ids.length === 0) {
+            return;
+        }
+
+        router.patch(
+            "/stock-movement/revert",
+            { ids },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSelectedRows((prev) => prev.filter((id) => !ids.includes(id)));
+                    setRevertOpen(false);
+                },
+            }
+        );
+    };
+
+    const handleRevertSelected = () => revertMovements(selectedRows);
+
+    const handleRevertMovement = (movementId: number) => revertMovements([movementId]);
+
     return (
         <>
             <Head title="Stock Movement" />
 
-            <div className="space-y-6 p-6">
+            <div className="flex h-full flex-col space-y-6 p-6 overflow-hidden">
 
                 <div className="flex items-center justify-between">
 
@@ -212,7 +276,7 @@ export default function StockMovement({
 
                     <Card>
 
-                        <CardContent className="flex items-center justify-between pt-6">
+                        <CardContent className="flex items-center justify-between py-4">
 
                             <div>
 
@@ -226,7 +290,7 @@ export default function StockMovement({
 
                             </div>
 
-                            <Package className="h-8 w-8 text-muted-foreground"/>
+                            <Package className="h-6 w-6 text-muted-foreground" />
 
                         </CardContent>
 
@@ -254,7 +318,7 @@ export default function StockMovement({
 
                             </div>
 
-                            <ArrowDownToLine className="h-8 w-8 text-green-600"/>
+                            <ArrowDownToLine className="h-6 w-6 text-green-600"/>
 
                         </CardContent>
 
@@ -282,7 +346,7 @@ export default function StockMovement({
 
                             </div>
 
-                            <ArrowUpFromLine className="h-8 w-8 text-red-600"/>
+                            <ArrowUpFromLine className="h-6 w-6 text-red-600"/>
 
                         </CardContent>
 
@@ -310,7 +374,7 @@ export default function StockMovement({
 
                             </div>
 
-                            <Pencil className="h-8 w-8 text-yellow-500"/>
+                            <Pencil className="h-6 w-6 text-yellow-500"/>
 
                         </CardContent>
 
@@ -338,7 +402,7 @@ export default function StockMovement({
 
                             </div>
 
-                            <Copy className="h-8 w-8 text-violet-600"/>
+                            <Copy className="h-6 w-6 text-violet-600"/>
 
                         </CardContent>
 
@@ -366,7 +430,7 @@ export default function StockMovement({
 
                             </div>
 
-                            <Archive className="h-8 w-8 text-gray-600"/>
+                            <Archive className="h-6 w-6 text-gray-600"/>
 
                         </CardContent>
 
@@ -376,9 +440,9 @@ export default function StockMovement({
 
                 <Card>
 
-                    <CardHeader>
+                    <CardHeader className="py-4">
 
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-4">
 
                             <div className="relative w-full max-w-sm">
 
@@ -395,61 +459,76 @@ export default function StockMovement({
 
                             </div>
 
-                            <DropdownMenu>
+                            <div className="flex items-center gap-2">
 
-                                <DropdownMenuTrigger asChild>
+                                <DropdownMenu>
 
-                                    <Button
-                                        variant="outline"
-                                        className="gap-2"
-                                    >
+                                    <DropdownMenuTrigger asChild>
 
-                                        <Filter className="h-4 w-4" />
+                                        <Button
+                                            variant="outline"
+                                            className="gap-2"
+                                        >
 
-                                        Filter
+                                            <Filter className="h-4 w-4" />
 
-                                    </Button>
+                                            Filter
 
-                                </DropdownMenuTrigger>
+                                        </Button>
 
-                                <DropdownMenuContent>
+                                    </DropdownMenuTrigger>
 
-                                    <DropdownMenuItem onClick={() => setFilter("all")}>
-                                        All
-                                    </DropdownMenuItem>
+                                    <DropdownMenuContent>
 
-                                    <DropdownMenuItem onClick={() => setFilter("CREATED")}>
-                                        Created
-                                    </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setFilter("all")}>
+                                            All
+                                        </DropdownMenuItem>
 
-                                    <DropdownMenuItem onClick={() => setFilter("EDITED")}>
-                                        Edited
-                                    </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setFilter("CREATED")}>
+                                            Created
+                                        </DropdownMenuItem>
 
-                                    <DropdownMenuItem onClick={() => setFilter("ARCHIVED")}>
-                                        Archived
-                                    </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setFilter("EDITED")}>
+                                            Edited
+                                        </DropdownMenuItem>
 
-                                    <DropdownMenuItem onClick={() => setFilter("DUPLICATED")}>
-                                        Duplicated
-                                    </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setFilter("ARCHIVED")}>
+                                            Archived
+                                        </DropdownMenuItem>
 
-                                    <DropdownMenuItem onClick={() => setFilter("STOCK_IN")}>
-                                        Stock In
-                                    </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setFilter("DUPLICATED")}>
+                                            Duplicated
+                                        </DropdownMenuItem>
 
-                                    <DropdownMenuItem onClick={() => setFilter("STOCK_OUT")}>
-                                        Stock Out
-                                    </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setFilter("STOCK_IN")}> 
+                                            Stock In
+                                        </DropdownMenuItem>
 
-                                    <DropdownMenuItem onClick={() => setFilter("STOCK_ADJUSTMENT")}
-                                    >
-                                        Stock Adjustment
-                                    </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setFilter("STOCK_OUT")}> 
+                                            Stock Out
+                                        </DropdownMenuItem>
 
-                                </DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => setFilter("STOCK_ADJUSTMENT")}
+                                        >
+                                            Stock Adjustment
+                                        </DropdownMenuItem>
 
-                            </DropdownMenu>
+                                    </DropdownMenuContent>
+
+                                </DropdownMenu>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={selectedRows.length === 0}
+                                    onClick={() => setRevertOpen(true)}
+                                    className="gap-2"
+                                >
+                                    <RotateCcw className="h-4 w-4" />
+                                    Revert Selected
+                                </Button>
+
+                            </div>
 
                         </div>
 
@@ -457,15 +536,23 @@ export default function StockMovement({
 
                     <CardContent>
 
-                        <div className="rounded-lg border overflow-hidden">
+                        <div className="rounded-lg border flex-1 overflow-hidden">
 
-                            <div className="max-h-[650px] overflow-auto">
+                            <div className="h-full overflow-auto">
 
                                 <table className="w-full">
 
                                     <thead className="sticky top-0 bg-background z-20">
 
                                         <tr>
+
+                                            <th className="p-3 text-left w-12">
+                                                <Checkbox
+                                                    checked={allEditedSelected}
+                                                    onCheckedChange={toggleSelectAllEdited}
+                                                    disabled={editableMovements.length === 0}
+                                                />
+                                            </th>
 
                                             <th className="p-3 text-left">
                                                 Product
@@ -515,6 +602,19 @@ export default function StockMovement({
                                                 key={movement.id}
                                                 className="border-t transition-colors hover:bg-muted/40"
                                             >
+
+                                                <td className="p-3">
+                                                    <Checkbox
+                                                        checked={selectedRows.includes(movement.id)}
+                                                        disabled={movement.type !== "EDITED"}
+                                                        onCheckedChange={(value) =>
+                                                            toggleRowSelection(
+                                                                Boolean(value),
+                                                                movement.id
+                                                            )
+                                                        }
+                                                    />
+                                                </td>
 
                                                 {/* Product */}
 
@@ -701,7 +801,35 @@ export default function StockMovement({
                 movement={selectedMovement}
                 showPrevious={showPrevious}
                 setShowPrevious={setShowPrevious}
+                onRevert={
+                    selectedMovement
+                        ? () => handleRevertMovement(selectedMovement.id)
+                        : undefined
+                }
             />
+
+            <Dialog open={revertOpen} onOpenChange={setRevertOpen}>
+                <DialogContent>
+                    <DialogTitle>Revert selected edits?</DialogTitle>
+                    <DialogDescription>
+                        This will restore all selected edited records to their original values. This action cannot be undone.
+                    </DialogDescription>
+                    <DialogFooter className="gap-2">
+                        <DialogClose asChild>
+                            <Button variant="secondary">Cancel</Button>
+                        </DialogClose>
+                        <DialogClose asChild>
+                            <Button
+                                variant="destructive"
+                                onClick={handleRevertSelected}
+                                disabled={selectedRows.length === 0}
+                            >
+                                Revert selected
+                            </Button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
         </>
     );

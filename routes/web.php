@@ -25,7 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     )->name('products.movements');
     
     Route::get('/stock-movement', [ProductController::class, 'movements'])
-    ->name('stock-movement');
+        ->name('stock-movement');
+
+    Route::patch('/stock-movement/revert', [ProductController::class, 'revertMovements'])
+        ->name('stock-movement.revert');
 
     Route::post(
         '/products/{product}/duplicate',
