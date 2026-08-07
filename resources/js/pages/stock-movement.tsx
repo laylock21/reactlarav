@@ -7,6 +7,7 @@ import {
     CardHeader,
 } from "@/components/ui/card";
 
+import StockMovementStats from "@/components/stock-movement/stock-movement-stats";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,8 +20,7 @@ import {
     DialogFooter,
     DialogTitle,
 } from "@/components/ui/dialog";
-
-
+import type { Movement } from "@/components/stock-movement/types";
 import { StockMovementViewDialog } from "@/components/stock-movement-view-dialog";
 
 import {
@@ -62,33 +62,6 @@ type ProductSnapshot = {
     selling_price?: number;
     status?: string;
     description?: string;
-};
-
-type Movement = {
-    id: number;
-    type: string;
-    quantity: number;
-    before_quantity: number;
-    after_quantity: number;
-    remarks: string | null;
-    created_at: string;
-
-    before_data?: ProductSnapshot | null;
-    after_data?: ProductSnapshot | null;
-
-    filters: {
-        search?: string;
-    };
-
-    product: {
-        id: number;
-        name: string;
-        sku: string;
-    };
-
-    user: {
-        name: string;
-    } | null;
 };
 
 type Props = {
@@ -316,171 +289,9 @@ export default function StockMovement({
 
                 {/* Statistics */}
 
-                <div className="grid gap-4 md:grid-cols-6">
-
-                    <Card>
-
-                        <CardContent className="flex items-center justify-between py-4">
-
-                            <div>
-
-                                <p className="text-sm text-muted-foreground">
-                                    Records
-                                </p>
-
-                                <h2 className="text-3xl font-bold">
-                                    {movements.total}
-                                </h2>
-
-                            </div>
-
-                            <Package className="h-6 w-6 text-muted-foreground" />
-
-                        </CardContent>
-
-                    </Card>
-
-                    <Card>
-
-                        <CardContent className="flex items-center justify-between pt-6">
-
-                            <div>
-
-                                <p className="text-sm text-muted-foreground">
-                                    Stock In
-                                </p>
-
-                                <h2 className="text-3xl font-bold text-green-600">
-
-                                    {
-                                        movements.data.filter(
-                                            m => m.type === "STOCK_IN"
-                                        ).length
-                                    }
-
-                                </h2>
-
-                            </div>
-
-                            <ArrowDownToLine className="h-6 w-6 text-green-600"/>
-
-                        </CardContent>
-
-                    </Card>
-
-                    <Card>
-
-                        <CardContent className="flex items-center justify-between pt-6">
-
-                            <div>
-
-                                <p className="text-sm text-muted-foreground">
-                                    Stock Out
-                                </p>
-
-                                <h2 className="text-3xl font-bold text-red-600">
-
-                                    {
-                                        movements.data.filter(
-                                            m => m.type === "STOCK_OUT"
-                                        ).length
-                                    }
-
-                                </h2>
-
-                            </div>
-
-                            <ArrowUpFromLine className="h-6 w-6 text-red-600"/>
-
-                        </CardContent>
-
-                    </Card>
-
-                    <Card>
-
-                        <CardContent className="flex items-center justify-between pt-6">
-
-                            <div>
-
-                                <p className="text-sm text-muted-foreground">
-                                    Edited
-                                </p>
-
-                                <h2 className="text-3xl font-bold text-yellow-500">
-
-                                    {
-                                        movements.data.filter(
-                                            m => m.type === "EDITED"
-                                        ).length
-                                    }
-
-                                </h2>
-
-                            </div>
-
-                            <Pencil className="h-6 w-6 text-yellow-500"/>
-
-                        </CardContent>
-
-                    </Card>
-
-                    <Card>
-
-                        <CardContent className="flex items-center justify-between pt-6">
-
-                            <div>
-
-                                <p className="text-sm text-muted-foreground">
-                                    Duplicated
-                                </p>
-
-                                <h2 className="text-3xl font-bold text-violet-600">
-
-                                    {
-                                        movements.data.filter(
-                                            m => m.type === "DUPLICATED"
-                                        ).length
-                                    }
-
-                                </h2>
-
-                            </div>
-
-                            <Copy className="h-6 w-6 text-violet-600"/>
-
-                        </CardContent>
-
-                    </Card>
-
-                    <Card>
-
-                        <CardContent className="flex items-center justify-between pt-6">
-
-                            <div>
-
-                                <p className="text-sm text-muted-foreground">
-                                    Archived
-                                </p>
-
-                                <h2 className="text-3xl font-bold text-gray-600">
-
-                                    {
-                                        movements.data.filter(
-                                            m => m.type === "ARCHIVED"
-                                        ).length
-                                    }
-
-                                </h2>
-
-                            </div>
-
-                            <Archive className="h-6 w-6 text-gray-600"/>
-
-                        </CardContent>
-
-                    </Card>
-
-                </div>
+                <StockMovementStats
+                    movements={movements.data}
+                />
 
                 <Card>
 
