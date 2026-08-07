@@ -1,5 +1,5 @@
 import { Head, Link, router } from "@inertiajs/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
     Card,
@@ -19,6 +19,7 @@ import {
     DialogFooter,
     DialogTitle,
 } from "@/components/ui/dialog";
+
 
 import { StockMovementViewDialog } from "@/components/stock-movement-view-dialog";
 
@@ -47,6 +48,7 @@ import {
     RotateCcw,
 } from "lucide-react";
 
+
 type ProductSnapshot = {
     sku?: string;
     barcode?: string;
@@ -73,6 +75,10 @@ type Movement = {
 
     before_data?: ProductSnapshot | null;
     after_data?: ProductSnapshot | null;
+
+    filters: {
+        search?: string;
+    };
 
     product: {
         id: number;
@@ -107,6 +113,10 @@ type Props = {
         }[];
     };
 
+    filters: {
+        search?: string;
+    };
+
     product?: {
         id: number;
         name: string;
@@ -115,10 +125,12 @@ type Props = {
 
 export default function StockMovement({
     movements,
+    filters,
     product,
 }: Props) {
 
     const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState(search);
     const [selectedMovement, setSelectedMovement] =
         useState<Movement | null>(null);
     const [showPrevious, setShowPrevious] = 
@@ -139,25 +151,40 @@ export default function StockMovement({
         | "STOCK_ADJUSTMENT"
     >("all");
 
-    const filteredMovements = useMemo(() => {
-        let data = [...movements.data];
+    const filteredMovements =
+    filter === "all"
+        ? movements.data
+        : movements.data.filter(
+              movement => movement.type === filter
+          );
+    
+    useEffect(() => {
 
-        data = data.filter(
-            movement =>
-                movement.product.name
-                    .toLowerCase()
-                    .includes(search.toLowerCase()) ||
-                movement.product.sku
-                    .toLowerCase()
-                    .includes(search.toLowerCase())
+        const timer = setTimeout(() => {
+
+            setDebouncedSearch(search);
+
+        }, 300);
+
+        return () => clearTimeout(timer);
+
+    }, [search]);
+
+    useEffect(() => {
+
+        router.get(
+            "/stock-movement",
+            {
+                search: debouncedSearch,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            }
         );
 
-        if (filter !== "all") {
-            data = data.filter(m => m.type === filter);
-        }
-
-        return data;
-    }, [movements.data, search, filter]);
+    }, [debouncedSearch]);
 
     const badgeColor = (type: string) => {
         switch (type) {
@@ -469,9 +496,7 @@ export default function StockMovement({
                                     className="pl-9"
                                     placeholder="Search product..."
                                     value={search}
-                                    onChange={(e) =>
-                                        setSearch(e.target.value)
-                                    }
+                                    onChange={(e)=>setSearch(e.target.value)}
                                 />
 
                             </div>

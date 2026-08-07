@@ -34,15 +34,37 @@ class ProductController extends Controller
             ],
         ]);
     }
-    public function movements()
+    public function movements(Request $request, Product $product = null)
     {
-        $movements = StockMovement::with(['product', 'user'])
-            ->latest()
-            ->paginate(50)
-            ->withQueryString();
+        $query = StockMovement::with(['product', 'user'])
+            ->latest();
+
+        if ($product) {
+            $query->where('product_id', $product->id);
+        }
+
+        if ($request->filled('search')) {
+
+            $search = $request->search;
+
+            $query->whereHas('product', function ($q) use ($search) {
+
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('sku', 'like', "%{$search}%");
+
+            });
+        }
 
         return Inertia::render('stock-movement', [
-            'movements' => $movements,
+            'movements' => $query
+                ->paginate(50)
+                ->withQueryString(),
+
+            'filters' => [
+                'search' => $request->search,
+            ],
+
+            'product' => $product,
         ]);
     }
 
