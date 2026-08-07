@@ -38,7 +38,8 @@ class ProductController extends Controller
     {
         $movements = StockMovement::with(['product', 'user'])
             ->latest()
-            ->paginate(15);
+            ->paginate(50)
+            ->withQueryString();
 
         return Inertia::render('stock-movement', [
             'movements' => $movements,

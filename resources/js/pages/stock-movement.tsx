@@ -88,6 +88,23 @@ type Movement = {
 type Props = {
     movements: {
         data: Movement[];
+
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+
+        from: number | null;
+        to: number | null;
+
+        prev_page_url: string | null;
+        next_page_url: string | null;
+
+        links: {
+            url: string | null;
+            label: string;
+            active: boolean;
+        }[];
     };
 
     product?: {
@@ -285,7 +302,7 @@ export default function StockMovement({
                                 </p>
 
                                 <h2 className="text-3xl font-bold">
-                                    {movements.data.length}
+                                    {movements.total}
                                 </h2>
 
                             </div>
@@ -783,11 +800,144 @@ export default function StockMovement({
                                         ))}
 
                                     </tbody>
-                                </table>
+                                    </table>
 
                             </div>
 
                         </div>
+
+                        {/* Pagination */}
+
+                        {movements.last_page > 1 && (
+
+                            <div className="mt-4 flex items-center justify-between">
+
+                                {/* Page Information */}
+
+                                <p className="text-sm text-muted-foreground">
+
+                                    Page {movements.current_page} of{" "}
+                                    {movements.last_page}
+
+                                </p>
+
+
+                                {/* Pagination Buttons */}
+
+                                <div className="flex items-center gap-2">
+
+                                    {/* Previous */}
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={!movements.prev_page_url}
+                                        onClick={() => {
+
+                                            if (movements.prev_page_url) {
+
+                                                router.get(
+                                                    movements.prev_page_url,
+                                                    {},
+                                                    {
+                                                        preserveScroll: true,
+                                                        preserveState: true,
+                                                    }
+                                                );
+
+                                            }
+
+                                        }}
+                                    >
+
+                                        <ArrowLeft className="mr-1 h-4 w-4" />
+
+                                        Previous
+
+                                    </Button>
+
+
+                                    {/* Page Numbers */}
+
+                                    {movements.links
+                                        .filter(
+                                            (link) =>
+                                                link.label !==
+                                                    "&laquo; Previous" &&
+                                                link.label !==
+                                                    "Next &raquo;"
+                                        )
+                                        .map((link, index) => (
+
+                                            <Button
+                                                key={index}
+                                                variant={
+                                                    link.active
+                                                        ? "default"
+                                                        : "outline"
+                                                }
+                                                size="sm"
+                                                disabled={!link.url}
+                                                onClick={() => {
+
+                                                    if (link.url) {
+
+                                                        router.get(
+                                                            link.url,
+                                                            {},
+                                                            {
+                                                                preserveScroll: true,
+                                                                preserveState: true,
+                                                            }
+                                                        );
+
+                                                    }
+
+                                                }}
+                                            >
+
+                                                {link.label}
+
+                                            </Button>
+
+                                        ))}
+
+
+                                    {/* Next */}
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={!movements.next_page_url}
+                                        onClick={() => {
+
+                                            if (movements.next_page_url) {
+
+                                                router.get(
+                                                    movements.next_page_url,
+                                                    {},
+                                                    {
+                                                        preserveScroll: true,
+                                                        preserveState: true,
+                                                    }
+                                                );
+
+                                            }
+
+                                        }}
+                                    >
+
+                                        Next
+
+                                        <ArrowRight className="ml-1 h-4 w-4" />
+
+                                    </Button>
+
+                                </div>
+
+                            </div>
+
+                        )}
 
                     </CardContent>
 
