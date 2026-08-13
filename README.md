@@ -14,7 +14,7 @@
 
 ```bash
 git clone https://github.com/laylock21/reactlarav
-cd <project-folder>
+cd reactlarav 
 
 composer install
 npm install
