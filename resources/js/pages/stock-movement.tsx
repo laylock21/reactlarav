@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/card";
 
 import StockMovementStats from "@/components/stock-movement/stock-movement-stats";
-import { StockMovementPagination } from "@/components/stock-movement/stock-movement-pagination";
 import { StockMovementTable } from "@/components/stock-movement/stock-movement-table";
 import { StockMovementToolbar } from "@/components/stock-movement/stock-movement-toolbar";
 import { Input } from "@/components/ui/input";
@@ -238,7 +237,7 @@ export default function StockMovement({
         <>
             <Head title="Stock Movement" />
 
-            <div className="flex h-full flex-col space-y-6 p-6 overflow-hidden">
+            <div className="flex h-full min-h-0 flex-col space-y-4 p-6 overflow-hidden">
 
                 <div className="flex items-center justify-between">
 
@@ -285,9 +284,9 @@ export default function StockMovement({
                     movements={movements.data}
                 />
 
-                <Card>
+                <Card className="flex flex-col overflow-hidden">
 
-                    <CardHeader className="py-4">
+                    <CardHeader className="px-6 py-3">
 
                         <StockMovementToolbar
                             search={search}
@@ -300,27 +299,21 @@ export default function StockMovement({
 
                     </CardHeader>
 
-                    <CardContent>
+                    <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
 
-                       <StockMovementTable
-                            movements={filteredMovements}
-                            selectedRows={selectedRows}
-                            allEditedSelected={allEditedSelected}
-                            toggleRowSelection={toggleRowSelection}
-                            toggleSelectAllEdited={toggleSelectAllEdited}
-                            setSelectedMovement={setSelectedMovement}
-                            setShowPrevious={setShowPrevious}
-                            setViewOpen={setViewOpen}
-                        />
-
-                        <StockMovementPagination
-                            currentPage={movements.current_page}
-                            lastPage={movements.last_page}
-                            prevPageUrl={movements.prev_page_url}
-                            nextPageUrl={movements.next_page_url}
-                            links={movements.links}
-                        />
-
+                        {/* TABLE AREA */}
+                        <div className="min-h-0 flex-1 overflow-hidden">
+                            <StockMovementTable
+                                movements={filteredMovements}
+                                selectedRows={selectedRows}
+                                allEditedSelected={allEditedSelected}
+                                toggleRowSelection={toggleRowSelection}
+                                toggleSelectAllEdited={toggleSelectAllEdited}
+                                setSelectedMovement={setSelectedMovement}
+                                setShowPrevious={setShowPrevious}
+                                setViewOpen={setViewOpen}
+                            />
+                        </div>
                     </CardContent>
 
                 </Card>

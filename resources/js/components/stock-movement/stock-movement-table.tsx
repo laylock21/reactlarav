@@ -72,9 +72,9 @@ export function StockMovementTable({
         type.replaceAll("_", " ");
 
     return (
-        <div className="rounded-lg border flex-1 overflow-hidden">
+        <div className="min-h-0 flex-1 rounded-lg border overflow-hidden">
 
-            <div className="h-full overflow-auto">
+            <div className="max-h-[520px] overflow-y-auto overflow-x-auto rounded-lg border">
 
                 <table className="w-full">
 
@@ -95,39 +95,39 @@ export function StockMovementTable({
                                 />
                             </th>
 
-                            <th className="p-3 text-left">
+                            <th className="px-3 py-2 text-left">
                                 Product
                             </th>
 
-                            <th className="p-3 text-left">
+                            <th className="px-3 py-2 text-left">
                                 View
                             </th>
 
-                            <th className="p-3 text-left">
+                            <th className="px-3 py-2 text-left">
                                 Action
                             </th>
 
-                            <th className="p-3 text-left">
+                            <th className="px-3 py-2 text-left">
                                 Change
                             </th>
 
-                            <th className="p-3 text-left">
+                            <th className="px-3 py-2 text-left">
                                 Before
                             </th>
 
-                            <th className="p-3 text-left">
+                            <th className="px-3 py-2 text-left">
                                 After
                             </th>
 
-                            <th className="p-3 text-left">
+                            <th className="px-3 py-2 text-left">
                                 User
                             </th>
 
-                            <th className="p-3 text-left">
+                            <th className="px-3 py-2 text-left">
                                 Date
                             </th>
 
-                            <th className="p-3 text-left">
+                            <th className="px-3 py-2 text-left">
                                 Remarks
                             </th>
 
@@ -146,7 +146,7 @@ export function StockMovementTable({
 
                                 {/* Checkbox */}
 
-                                <td className="p-3">
+                                <td className="px-3 py-2">
 
                                     <Checkbox
                                         checked={selectedRows.includes(
@@ -167,7 +167,7 @@ export function StockMovementTable({
 
                                 {/* Product */}
 
-                                <td className="p-3">
+                                <td className="px-3 py-2">
 
                                     <div className="space-y-1">
 
@@ -185,8 +185,7 @@ export function StockMovementTable({
 
                                 {/* View */}
 
-                                <td className="p-3">
-
+                                <td className="px-3 py-2">
                                     <Button
                                         variant="ghost"
                                         size="sm"
@@ -214,7 +213,7 @@ export function StockMovementTable({
 
                                 {/* Action */}
 
-                                <td className="p-3">
+                                <td className="px-3 py-2">
 
                                     <Badge
                                         className={badgeColor(
@@ -296,7 +295,7 @@ export function StockMovementTable({
 
                                 {/* User */}
 
-                                <td className="p-3">
+                                <td className="px-3 py-2">
                                     {movement.user?.name ?? "System"}
                                 </td>
 

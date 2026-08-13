@@ -80,7 +80,7 @@ class ProductController extends Controller
             'user',
         ])
             ->latest()
-            ->paginate(10)
+            ->get()
             ->withQueryString();
 
         foreach ($movements as $movement) {

@@ -19,11 +19,11 @@ export default function StockMovementStats({
     movements,
 }: Props) {
     return (
-        <div className="grid gap-4 md:grid-cols-6">
+        <div className="grid gap-3 md:grid-cols-6">
 
             <Card>
 
-                <CardContent className="flex items-center justify-between pt-6">
+                <CardContent className="flex items-center justify-between py-4">
 
                     <div>
 
@@ -45,7 +45,7 @@ export default function StockMovementStats({
 
             <Card>
 
-                <CardContent className="flex items-center justify-between pt-6">
+                <CardContent className="flex items-center justify-between py-4">
 
                     <div>
 
@@ -71,7 +71,7 @@ export default function StockMovementStats({
 
             <Card>
 
-                <CardContent className="flex items-center justify-between pt-6">
+                <CardContent className="flex items-center justify-between py-4">
 
                     <div>
 
@@ -97,7 +97,7 @@ export default function StockMovementStats({
 
             <Card>
 
-                <CardContent className="flex items-center justify-between pt-6">
+                <CardContent className="flex items-center justify-between py-4">
 
                     <div>
 
@@ -123,7 +123,7 @@ export default function StockMovementStats({
 
             <Card>
 
-                <CardContent className="flex items-center justify-between pt-6">
+                <CardContent className="flex items-center justify-between py-4">
 
                     <div>
 
@@ -149,7 +149,7 @@ export default function StockMovementStats({
 
             <Card>
 
-                <CardContent className="flex items-center justify-between pt-6">
+                <CardContent className="flex items-center justify-between py-4">
 
                     <div>
 
