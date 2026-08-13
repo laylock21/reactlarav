@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/card";
 
 import StockMovementStats from "@/components/stock-movement/stock-movement-stats";
+import { StockMovementPagination } from "@/components/stock-movement/stock-movement-pagination";
+import { StockMovementTable } from "@/components/stock-movement/stock-movement-table";
+import { StockMovementToolbar } from "@/components/stock-movement/stock-movement-toolbar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,23 +34,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import {
-    Search,
     Filter,
+    Search,
     History,
-    ArrowDownToLine,
-    ArrowUpFromLine,
-    Pencil,
-    Archive,
-    Package,
-    Copy,
-    Plus,
     ArrowLeft,
-    Eye,
-    ArrowRight,
-    ArrowUpDown,
     RotateCcw,
 } from "lucide-react";
-
 
 type ProductSnapshot = {
     sku?: string;
@@ -297,483 +289,37 @@ export default function StockMovement({
 
                     <CardHeader className="py-4">
 
-                        <div className="flex items-center justify-between gap-4">
-
-                            <div className="relative w-full max-w-sm">
-
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-                                <Input
-                                    className="pl-9"
-                                    placeholder="Search product..."
-                                    value={search}
-                                    onChange={(e)=>setSearch(e.target.value)}
-                                />
-
-                            </div>
-
-                            <div className="flex items-center gap-2">
-
-                                <DropdownMenu>
-
-                                    <DropdownMenuTrigger asChild>
-
-                                        <Button
-                                            variant="outline"
-                                            className="gap-2"
-                                        >
-
-                                            <Filter className="h-4 w-4" />
-
-                                            Filter
-
-                                        </Button>
-
-                                    </DropdownMenuTrigger>
-
-                                    <DropdownMenuContent>
-
-                                        <DropdownMenuItem onClick={() => setFilter("all")}>
-                                            All
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setFilter("CREATED")}>
-                                            Created
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setFilter("EDITED")}>
-                                            Edited
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setFilter("ARCHIVED")}>
-                                            Archived
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setFilter("DUPLICATED")}>
-                                            Duplicated
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setFilter("STOCK_IN")}> 
-                                            Stock In
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setFilter("STOCK_OUT")}> 
-                                            Stock Out
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setFilter("STOCK_ADJUSTMENT")}
-                                        >
-                                            Stock Adjustment
-                                        </DropdownMenuItem>
-
-                                    </DropdownMenuContent>
-
-                                </DropdownMenu>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={selectedRows.length === 0}
-                                    onClick={() => setRevertOpen(true)}
-                                    className="gap-2"
-                                >
-                                    <RotateCcw className="h-4 w-4" />
-                                    Revert Selected
-                                </Button>
-
-                            </div>
-
-                        </div>
+                        <StockMovementToolbar
+                            search={search}
+                            setSearch={setSearch}
+                            filter={filter}
+                            setFilter={setFilter}
+                            selectedRows={selectedRows}
+                            onRevertSelected={() => setRevertOpen(true)}
+                        />
 
                     </CardHeader>
 
                     <CardContent>
 
-                        <div className="rounded-lg border flex-1 overflow-hidden">
-
-                            <div className="h-full overflow-auto">
-
-                                <table className="w-full">
-
-                                    <thead className="sticky top-0 bg-background z-20">
-
-                                        <tr>
-
-                                            <th className="p-3 text-left w-12">
-                                                <Checkbox
-                                                    checked={allEditedSelected}
-                                                    onCheckedChange={toggleSelectAllEdited}
-                                                    disabled={editableMovements.length === 0}
-                                                />
-                                            </th>
-
-                                            <th className="p-3 text-left">
-                                                Product
-                                            </th>
-
-                                            <th className="p-3 text-left">
-                                                View
-                                            </th>
-
-                                            <th className="p-3 text-left">
-                                                Action
-                                            </th>
-
-                                            <th className="p-3 text-left">
-                                                Change
-                                            </th>
-
-                                            <th className="p-3 text-left">
-                                                Before
-                                            </th>
-
-                                            <th className="p-3 text-left">
-                                                After
-                                            </th>
-
-                                            <th className="p-3 text-left">
-                                                User
-                                            </th>
-
-                                            <th className="p-3 text-left">
-                                                Date
-                                            </th>
-
-                                            <th className="p-3 text-left">
-                                                Remarks
-                                            </th>
-
-                                        </tr>
-
-                                    </thead>
-
-                                    <tbody>
-
-                                        {filteredMovements.map((movement) => (
-
-                                            <tr
-                                                key={movement.id}
-                                                className="border-t transition-colors hover:bg-muted/40"
-                                            >
-
-                                                <td className="p-3">
-                                                    <Checkbox
-                                                        checked={selectedRows.includes(movement.id)}
-                                                        disabled={movement.type !== "EDITED"}
-                                                        onCheckedChange={(value) =>
-                                                            toggleRowSelection(
-                                                                Boolean(value),
-                                                                movement.id
-                                                            )
-                                                        }
-                                                    />
-                                                </td>
-
-                                                {/* Product */}
-
-                                                <td className="p-3">
-
-                                                    <div className="space-y-1">
-
-                                                        <p className="font-medium">
-                                                            {movement.product.name}
-                                                        </p>
-
-                                                        <Badge variant="secondary">
-                                                            {movement.product.sku}
-                                                        </Badge>
-
-                                                    </div>
-
-                                                </td>
-
-                                                {/* Action */}
-
-                                                <td className="p-3">
-
-                                                    <Badge className={badgeColor(movement.type)}>
-
-                                                        {movement.type === "CREATED" && (
-                                                            <Plus className="mr-1 h-3 w-3" />
-                                                        )}
-
-                                                        {movement.type === "EDITED" && (
-                                                            <Pencil className="mr-1 h-3 w-3" />
-                                                        )}
-
-                                                        {movement.type === "DUPLICATED" && (
-                                                            <Copy className="mr-1 h-3 w-3" />
-                                                        )}
-
-                                                        {movement.type === "ARCHIVED" && (
-                                                            <Archive className="mr-1 h-3 w-3" />
-                                                        )}
-
-                                                        {movement.type === "STOCK_IN" && (
-                                                            <ArrowDownToLine className="mr-1 h-3 w-3" />
-                                                        )}
-
-                                                        {movement.type === "STOCK_OUT" && (
-                                                            <ArrowUpFromLine className="mr-1 h-3 w-3" />
-                                                        )}
-
-                                                        {prettyAction(movement.type)}
-
-                                                    </Badge>
-
-                                                </td>
-
-                                                {/* Quantity */}
-
-                                                <td className="p-3 font-semibold">
-
-                                                    {movement.type === "STOCK_IN" && (
-
-                                                        <span className="text-green-600">
-
-                                                            +{movement.quantity}
-
-                                                        </span>
-
-                                                    )}
-
-                                                    {movement.type === "STOCK_OUT" && (
-
-                                                        <span className="text-red-600">
-
-                                                            -{movement.quantity}
-
-                                                        </span>
-
-                                                    )}
-
-                                                    {movement.type !== "STOCK_IN" &&
-                                                        movement.type !== "STOCK_OUT" && (
-
-                                                        <span className="text-muted-foreground">
-
-                                                            —
-
-                                                        </span>
-
-                                                    )}
-
-                                                    {movement.type === "STOCK_ADJUSTMENT" && (
-                                                        <ArrowUpDown className="mr-1 h-3 w-3" />
-                                                    )}
-
-                                                </td>
-
-                                                {/* Before */}
-
-                                                <td className="p-3 text-muted-foreground">
-
-                                                    {movement.before_quantity}
-
-                                                </td>
-
-                                                {/* After */}
-
-                                                <td className="p-3 font-semibold">
-
-                                                    {movement.after_quantity}
-
-                                                </td>
-
-                                                {/* User */}
-
-                                                <td className="p-3">
-
-                                                    {movement.user?.name ?? "System"}
-
-                                                </td>
-
-                                                {/* Date */}
-
-                                                <td className="p-3 whitespace-nowrap">
-
-                                                    {new Date(
-                                                        movement.created_at
-                                                    ).toLocaleString()}
-
-                                                </td>
-
-                                                {/* Remarks */}
-
-                                                <td className="p-3 max-w-xs">
-
-                                                    {movement.remarks ?? "—"}
-
-                                                </td>
-
-                                                {/* NEW VIEW BUTTON */}
-
-                                                <td className="p-3">
-
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="gap-2"
-                                                        onClick={() => {
-
-                                                            setSelectedMovement(movement);
-                                                            setShowPrevious({});
-                                                            setViewOpen(true);
-
-                                                        }}
-                                                    >
-
-                                                        <Eye className="mr-2 h-4 w-4" />
-
-                                                        View Details
-
-                                                    </Button>
-
-                                                </td>
-
-                                            </tr>
-
-                                        ))}
-
-                                    </tbody>
-                                    </table>
-
-                            </div>
-
-                        </div>
-
-                        {/* Pagination */}
-
-                        {movements.last_page > 1 && (
-
-                            <div className="mt-4 flex items-center justify-between">
-
-                                {/* Page Information */}
-
-                                <p className="text-sm text-muted-foreground">
-
-                                    Page {movements.current_page} of{" "}
-                                    {movements.last_page}
-
-                                </p>
-
-
-                                {/* Pagination Buttons */}
-
-                                <div className="flex items-center gap-2">
-
-                                    {/* Previous */}
-
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={!movements.prev_page_url}
-                                        onClick={() => {
-
-                                            if (movements.prev_page_url) {
-
-                                                router.get(
-                                                    movements.prev_page_url,
-                                                    {},
-                                                    {
-                                                        preserveScroll: true,
-                                                        preserveState: true,
-                                                    }
-                                                );
-
-                                            }
-
-                                        }}
-                                    >
-
-                                        <ArrowLeft className="mr-1 h-4 w-4" />
-
-                                        Previous
-
-                                    </Button>
-
-
-                                    {/* Page Numbers */}
-
-                                    {movements.links
-                                        .filter(
-                                            (link) =>
-                                                link.label !==
-                                                    "&laquo; Previous" &&
-                                                link.label !==
-                                                    "Next &raquo;"
-                                        )
-                                        .map((link, index) => (
-
-                                            <Button
-                                                key={index}
-                                                variant={
-                                                    link.active
-                                                        ? "default"
-                                                        : "outline"
-                                                }
-                                                size="sm"
-                                                disabled={!link.url}
-                                                onClick={() => {
-
-                                                    if (link.url) {
-
-                                                        router.get(
-                                                            link.url,
-                                                            {},
-                                                            {
-                                                                preserveScroll: true,
-                                                                preserveState: true,
-                                                            }
-                                                        );
-
-                                                    }
-
-                                                }}
-                                            >
-
-                                                {link.label}
-
-                                            </Button>
-
-                                        ))}
-
-
-                                    {/* Next */}
-
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={!movements.next_page_url}
-                                        onClick={() => {
-
-                                            if (movements.next_page_url) {
-
-                                                router.get(
-                                                    movements.next_page_url,
-                                                    {},
-                                                    {
-                                                        preserveScroll: true,
-                                                        preserveState: true,
-                                                    }
-                                                );
-
-                                            }
-
-                                        }}
-                                    >
-
-                                        Next
-
-                                        <ArrowRight className="ml-1 h-4 w-4" />
-
-                                    </Button>
-
-                                </div>
-
-                            </div>
-
-                        )}
+                       <StockMovementTable
+                            movements={filteredMovements}
+                            selectedRows={selectedRows}
+                            allEditedSelected={allEditedSelected}
+                            toggleRowSelection={toggleRowSelection}
+                            toggleSelectAllEdited={toggleSelectAllEdited}
+                            setSelectedMovement={setSelectedMovement}
+                            setShowPrevious={setShowPrevious}
+                            setViewOpen={setViewOpen}
+                        />
+
+                        <StockMovementPagination
+                            currentPage={movements.current_page}
+                            lastPage={movements.last_page}
+                            prevPageUrl={movements.prev_page_url}
+                            nextPageUrl={movements.next_page_url}
+                            links={movements.links}
+                        />
 
                     </CardContent>
 

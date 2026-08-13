@@ -21,18 +21,20 @@ import { ProductDialog } from "@/components/product-dialog";
 
 import { useEffect, useMemo, useState } from "react";
 import { ProductViewDialog } from "@/components/product-view-dialog";
-
+import { ProductsToolbar } from "@/components/products/products-toolbar";
+import { ProductsPagination } from "@/components/products/products-pagination";
+import { ProductsTable } from "@/components/products/products-table";
+import type {
+    ProductForm,
+    ProductStatus,
+} from "@/components/products/products-types";
 
 import {
-    Search,
-    Filter,
-    Upload,
-    Trash2,
-    Plus,
     MoreVertical,
     Pencil,
     Eye,
     Copy,
+    Trash2,
     Package,
     Archive,
 } from "lucide-react";
@@ -93,12 +95,9 @@ export default function Products({ products: productList }: Props) {
         archived: false,
     };
 
-type ProductForm = Omit<Product, "id" | "created_at" | "updated_at">;
-
 const [form, setForm] = useState<ProductForm>(emptyForm);
-    const [statusFilter, setStatusFilter] = useState<
-        "all" | "Delivered" | "Pending" | "Low Stock"
-    >("all");
+    const [statusFilter, setStatusFilter] =
+    useState<ProductStatus>("all");
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -277,483 +276,44 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                 </div>
                 <Card className="flex flex-col flex-1 overflow-hidden">
 
-                    <CardHeader className="px-6 py-5">
-                        <div className="flex items-center justify-between gap-4">
-
-                            {/* Left Side */}
-                            <div className="relative max-w-sm w-full">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-                                <Input
-                                    placeholder="Search products..."
-                                    className="pl-9"
-                                    value={search}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-
-                                        setSearch(value);
-
-                                        router.get(
-                                            "/products",
-                                            { search: value },
-                                            {
-                                                preserveState: true,
-                                                preserveScroll: true,
-                                                replace: true,
-                                            }
-                                        );
-                                    }}
-                                />
-                            </div>
-
-                            {/* Right Side */}
-                            <div className="flex items-center gap-2">
-
-                                {/* Filter */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline">
-                                            <Filter className="mr-2 h-4 w-4" />
-                                            Filter
-                                        </Button>
-                                    </DropdownMenuTrigger>
-
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => setStatusFilter("all")}>
-                                            All Products
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setStatusFilter("Delivered")}>
-                                            Delivered
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setStatusFilter("Pending")}>
-                                            Pending
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem onClick={() => setStatusFilter("Low Stock")}>
-                                            Low Stock
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-
-                                {/* Import */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline">
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            Export
-                                        </Button>
-                                    </DropdownMenuTrigger>
- 
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                toast.success("Preparing CSV export...");
-                                                window.location.href = "/products/export/csv";
-                                            }}
-                                        >
-                                            CSV
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                toast.success("Preparing PDF export...");
-                                                window.location.href = "/products/export/pdf";
-                                            }}
-                                        >
-                                            PDF
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-
-                                {/* Delete */}
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={selectedRows.length === 0}
-                                    onClick={() => {
-                                        setBulkDelete(true);
-                                        setDeleteTarget(null);
-                                        setDeleteOpen(true);
-                                    }}
-                                    className="transition-colors duration-300 ease-out"
-                                >
-                                    <Trash2
-                                        className={`mr-2 h-4 w-4 transition-all duration-200 ${
-                                            selectedRows.length > 0
-                                                ? "text-red-600 scale-100"
-                                                : "text-muted-foreground scale-95"
-                                        }`}
-                                    />
-
-                                    <span
-                                        className={`transition-all duration-200 ${
-                                            selectedRows.length > 0
-                                                ? "text-red-600 scale-100"
-                                                : "text-muted-foreground scale-95"
-                                        }`}
-                                    >
-                                        Delete
-                                    </span>
-                                </Button>
-
-                                {/* Add Product */}
-                                <Button
-                                    onClick={() => {
-                                        setEditingProduct(null);
-                                        setForm(emptyForm);
-                                        setOpen(true);
-                                    }}
-                                >
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Add Product
-                                </Button>
-
-                            </div>
-                        </div>
+                   <CardHeader className="px-6 py-5">
+                        <ProductsToolbar
+                            search={search}
+                            setSearch={setSearch}
+                            statusFilter={statusFilter}
+                            setStatusFilter={setStatusFilter}
+                            selectedRows={selectedRows}
+                            setEditingProduct={setEditingProduct}
+                            setForm={setForm}
+                            setOpen={setOpen}
+                            setBulkDelete={setBulkDelete}
+                            setDeleteTarget={setDeleteTarget}
+                            setDeleteOpen={setDeleteOpen}
+                        />
                     </CardHeader>
-
                     <CardContent className="px-8 pb-6 flex flex-col overflow-hidden">
-                        <div className="overflow-x-auto h-full">
-                            <div className="flex-1 min-w-full overflow-y-auto">
-                                <Table>
-
-                                    <TableHeader className="sticky top-0 bg-background z-10">
-                                        <TableRow className="border-b last:border-0">
-
-                                            <TableHead className="w-12">
-                                                <Checkbox
-                                                    checked={
-                                                        filteredProducts.length > 0 &&
-                                                        selectedRows.length === filteredProducts.length
-                                                    }
-                                                    onCheckedChange={(checked) => {
-                                                        if (checked) {
-                                                            setSelectedRows(filteredProducts.map((p) => p.id));
-                                                        } else {
-                                                            setSelectedRows([]);
-                                                        }
-                                                    }}
-                                                />
-                                            </TableHead>
-
-                                            <TableHead className="w-12"></TableHead>
-
-                                            <TableHead>SKU</TableHead>
-
-                                            <TableHead>Supplier</TableHead>
-                
-                                            <TableHead>Product</TableHead>
-
-                                            <TableHead>Category</TableHead>
-
-                                            <TableHead>Stock</TableHead>
-
-                                            <TableHead>Status</TableHead>
-
-                                            <TableHead>Ordered</TableHead>
-
-                                            <TableHead className="text-right">
-                                                Price
-                                            </TableHead>
-
-
-                                        </TableRow>
-                                    </TableHeader>
-
-                                    <TableBody>
-
-                                        {filteredProducts.map((product) => (
-
-                                            <TableRow
-                                                key={product.id}
-                                                className="border-b border-slate-200 dark:border-slate-800"
-                                            >
-                                                
-                                                <TableCell>
-                                                    <Checkbox
-                                                        checked={selectedRows.includes(product.id)}
-                                                        onCheckedChange={(checked) => {
-                                                            if (checked) {
-                                                                setSelectedRows([...selectedRows, product.id]);
-                                                            } else {
-                                                                setSelectedRows(
-                                                                    selectedRows.filter((id) => id !== product.id)
-                                                                );
-                                                            }
-                                                        }}
-                                                    />
-                                                </TableCell>
-
-                                                <TableCell>
-                                                    <DropdownMenu>
-
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                            >
-                                                                <MoreVertical className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-
-                                                        <DropdownMenuContent
-                                                            align="start"
-                                                            sideOffset={8}
-                                                            className="w-56"
-                                                        >
-
-                                                        <DropdownMenuItem
-                                                            onClick={() => {
-                                                                setSelectedProduct(product);
-                                                                setViewOpen(true);
-                                                            }}
-                                                        >
-                                                            <Eye className="mr-2 h-4 w-4" />
-                                                            View Details
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                            onClick={() => {
-                                                                setEditingProduct(product);
-
-                                                                setForm({
-                                                                    sku: product.sku,
-                                                                    barcode: product.barcode ?? "",
-                                                                    name: product.name,
-                                                                    supplier: product.supplier,
-                                                                    category: product.category,
-                                                                    unit: product.unit,
-                                                                    quantity: product.quantity,
-                                                                    minimum_stock: product.minimum_stock,
-                                                                    cost_price: product.cost_price,
-                                                                    selling_price: product.selling_price,
-                                                                    status: product.status,
-                                                                    description: product.description ?? "",
-                                                                    archived: product.archived,
-                                                                });
-
-                                                                setOpen(true);
-                                                            }}
-                                                        >
-                                                            <Pencil className="mr-2 h-4 w-4" />
-                                                            Edit Product
-                                                        </DropdownMenuItem>
-
-                                                        <DropdownMenuItem
-                                                            onClick={() => {
-                                                                router.post(products.duplicate(product.id).url, {}, {
-                                                                    preserveScroll: true,
-                                                                    onSuccess: () => {
-                                                                        setStatusOpen(false);
-                                                                        toast.success("Status updated.", {
-                                                                            description: `Changed ${product.name} successfully.`,
-                                                                        });
-                                                                        router.reload({
-                                                                            only: ["products"],
-                                                                        });
-                                                                    },
-                                                                    onError: () => {
-                                                                        toast.error("Unable to update status.");
-                                                                    },
-                                                                });
-                                                            }}
-                                                        >
-                                                            <Copy className="mr-2 h-4 w-4" />
-                                                            Duplicate
-                                                        </DropdownMenuItem>
-
-                                                        <DropdownMenuSeparator />
-
-                                                        <DropdownMenuSeparator />
-
-                                                        <DropdownMenuItem
-                                                            onClick={() => {
-                                                                router.patch(products.archive(product.id).url, {}, {
-                                                                    preserveScroll: true,
-                                                                    onSuccess: () => {
-                                                                        toast.success("Product archived.", {
-                                                                            description: "The product has been moved to the archive.",
-                                                                        });
-                                                                        router.reload({
-                                                                            only: ["products"],
-                                                                        });
-                                                                    },
-                                                                    onError: () => {
-                                                                        toast.error("Unable to archive product.");
-                                                                    },
-                                                                });
-                                                            }}
-                                                        >
-                                                            <Archive className="mr-2 h-4 w-4" />
-                                                            Archive
-                                                        </DropdownMenuItem>
-
-                                                        <DropdownMenuItem
-                                                            className="text-red-600"
-                                                            onClick={() => {
-                                                                setBulkDelete(false);
-                                                                setDeleteTarget(product);
-                                                                setDeleteOpen(true);
-                                                            }}
-                                                        >
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            Delete
-                                                        </DropdownMenuItem>
-
-                                                    </DropdownMenuContent>
-
-                                                    </DropdownMenu>
-                                                </TableCell>
-
-                                                <TableCell>{product.sku}</TableCell>
-
-                                                <TableCell>{product.supplier}</TableCell>
-
-                                                <TableCell className="font-medium">
-                                                    {product.name}
-                                                </TableCell>
-
-                                                <TableCell>{product.category}</TableCell>
-
-                                                <TableCell>{product.quantity}</TableCell>
-
-                                                <TableCell>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <button>
-                                                                <Badge className={getStatusColor(product.status)}>
-                                                                    {product.status}
-                                                                </Badge>
-                                                            </button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent>
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    setStatusProduct(product);
-                                                                    setNewStatus("Pending");
-                                                                    setStatusOpen(true);
-                                                                }}
-                                                            >
-                                                                Pending
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    setStatusProduct(product);
-                                                                    setNewStatus("Delivered");
-                                                                    setStatusOpen(true);
-                                                                }}
-                                                            >
-                                                                Delivered
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    setStatusProduct(product);
-                                                                    setNewStatus("In Transit");
-                                                                    setStatusOpen(true);
-                                                                }}
-                                                            >
-                                                                In Transit
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </TableCell>
-
-                                                <TableCell>{new Date(product.created_at).toLocaleDateString()}</TableCell>
-
-                                                <TableCell className="text-right">
-                                                    ₱{Number(product.selling_price).toLocaleString()}
-                                                </TableCell>
-
-                                            </TableRow>
-
-                                        ))}
-
-                                    </TableBody>
-
-                                </Table>
-                            </div>
-                        </div>
+                        <ProductsTable
+                            products={filteredProducts}
+                            selectedRows={selectedRows}
+                            setSelectedRows={setSelectedRows}
+                            setSelectedProduct={setSelectedProduct}
+                            setViewOpen={setViewOpen}
+                            setEditingProduct={setEditingProduct}
+                            setForm={setForm}
+                            setOpen={setOpen}
+                            setBulkDelete={setBulkDelete}
+                            setDeleteTarget={setDeleteTarget}
+                            setDeleteOpen={setDeleteOpen}
+                            setStatusProduct={setStatusProduct}
+                            setNewStatus={setNewStatus}
+                            setStatusOpen={setStatusOpen}
+                            getStatusColor={getStatusColor}
+                        />
                     </CardContent>
                 </Card>
-            <div className="mt-6 flex items-center justify-between">
-
-                {/* LEFT - Page Size */}
-                <div className="flex items-center gap-2">
-
-                    <span className="text-sm text-muted-foreground">
-                        Go to page
-                    </span>
-
-                    <select
-                        className="h-9 rounded-md border bg-background px-3 text-sm"
-                        value={productList.current_page}
-                        onChange={(e) =>
-                            router.get(`/products?page=${e.target.value}`)
-                        }
-                    >
-                        {Array.from(
-                            { length: productList.last_page },
-                            (_, i) => (
-                                <option
-                                    key={i + 1}
-                                    value={i + 1}
-                                >
-                                    {i + 1}
-                                </option>
-                            )
-                        )}
-                    </select>
-
-                </div>
-
-                {/* CENTER - Pagination */}
-                <div className="flex items-center gap-2">
-
-                    <Button
-                        variant="outline"
-                        disabled={productList.current_page === 1}
-                        onClick={() => router.get(productList.prev_page_url!)}
-                    >
-                        Previous
-                    </Button>
-
-                    {Array.from(
-                        { length: Math.max(productList.last_page, 5) },
-                        (_, i) => (
-                            <Button
-                                key={i}
-                                variant={
-                                    productList.current_page === i + 1
-                                        ? "default"
-                                        : "outline"
-                                }
-                                disabled={i + 1 > productList.last_page}
-                                onClick={() =>
-                                    router.get(`/products?page=${i + 1}`)
-                                }
-                            >
-                                {i + 1}
-                            </Button>
-                        )
-                    )}
-
-                    <Button
-                        variant="outline"
-                        disabled={productList.current_page === productList.last_page}
-                        onClick={() => router.get(productList.next_page_url!)}
-                    >
-                        Next
-                    </Button>
-
-                </div>
-
-                {/* RIGHT - Page Indicator */}
-                <div className="text-sm text-muted-foreground whitespace-nowrap">
-                    Page {productList.current_page} of {productList.last_page}
-                </div>
-
-            </div>
+            <ProductsPagination
+                productList={productList}
+            />
             </div>
             <ProductViewDialog
                 open={viewOpen}

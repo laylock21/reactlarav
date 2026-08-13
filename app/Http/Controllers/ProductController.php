@@ -75,9 +75,13 @@ class ProductController extends Controller
             'ids.*' => 'required|integer|exists:stock_movements,id',
         ]);
 
-        $movements = StockMovement::with('product')
-            ->whereIn('id', $validated['ids'])
-            ->get();
+        $movements = StockMovement::with([
+            'product',
+            'user',
+        ])
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         foreach ($movements as $movement) {
             if ($movement->type !== 'EDITED' || ! $movement->before_data) {
