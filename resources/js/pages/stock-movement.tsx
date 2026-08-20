@@ -10,6 +10,7 @@ import {
 import StockMovementStats from "@/components/stock-movement/stock-movement-stats";
 import { StockMovementTable } from "@/components/stock-movement/stock-movement-table";
 import { StockMovementToolbar } from "@/components/stock-movement/stock-movement-toolbar";
+import { ProductViewDialog } from "@/components/product-view-dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ import {
     ArrowLeft,
     RotateCcw,
 } from "lucide-react";
+import { Product } from "@/types/product";
 
 type ProductSnapshot = {
     sku?: string;
@@ -92,6 +94,9 @@ export default function StockMovement({
     filters,
     product,
 }: Props) {
+
+    const [selectedProduct, setSelectedProduct] =
+    useState<Product | null>(null);
 
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState(search);
@@ -310,6 +315,7 @@ export default function StockMovement({
                                 toggleRowSelection={toggleRowSelection}
                                 toggleSelectAllEdited={toggleSelectAllEdited}
                                 setSelectedMovement={setSelectedMovement}
+                                setSelectedProduct={setSelectedProduct}
                                 setShowPrevious={setShowPrevious}
                                 setViewOpen={setViewOpen}
                             />
@@ -331,6 +337,16 @@ export default function StockMovement({
                         ? () => handleRevertMovement(selectedMovement.id)
                         : undefined
                 }
+            />
+
+            <ProductViewDialog
+                open={selectedProduct !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectedProduct(null);
+                    }
+                }}
+                product={selectedProduct}
             />
 
             <Dialog open={revertOpen} onOpenChange={setRevertOpen}>

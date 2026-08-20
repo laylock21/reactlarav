@@ -62,25 +62,39 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton
                                 onClick={() => {
-                                    setOpenMenus(prev => ({
-                                        ...prev,
-                                        [item.title]: !prev[item.title],
-                                    }));
-
                                     router.visit(item.href);
                                 }}
                                 tooltip={{ children: item.title }}
                             >
                                 <div className="flex items-center gap-2">
                                     {item.icon && <item.icon />}
-                                    <span className="flex-1">{item.title}</span>
+
+                                    <span className="flex-1">
+                                        {item.title}
+                                    </span>
                                 </div>
 
-                                <ChevronRight
-                                    className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                                        isOpen ? "rotate-90" : ""
-                                    }`}
-                                />
+                                {/* Dropdown toggle */}
+                                <button
+                                    type="button"
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+
+                                        setOpenMenus((prev) => ({
+                                            ...prev,
+                                            [item.title]: !prev[item.title],
+                                        }));
+                                    }}
+                                    className="flex h-6 w-6 items-center justify-center rounded-sm hover:bg-sidebar-accent"
+                                    aria-label={`Toggle ${item.title} submenu`}
+                                >
+                                    <ChevronRight
+                                        className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                                            isOpen ? "rotate-90" : ""
+                                        }`}
+                                    />
+                                </button>
                             </SidebarMenuButton>
 
                             <div

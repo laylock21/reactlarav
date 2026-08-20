@@ -1,8 +1,20 @@
-import { Eye, Plus, Pencil, Copy, Archive, ArrowDownToLine, ArrowUpFromLine, ArrowUpDown } from "lucide-react";
+import { Link } from "@inertiajs/react";
+import {
+    Eye,
+    Plus,
+    Pencil,
+    Copy,
+    Archive,
+    ArrowDownToLine,
+    ArrowUpFromLine,
+    ArrowUpDown,
+    ArrowRight,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { Product } from "@/types/product";
 
 import type { Movement } from "@/components/stock-movement/types";
 
@@ -12,6 +24,8 @@ type StockMovementTableProps = {
     selectedRows: number[];
 
     allEditedSelected: boolean;
+
+    setSelectedProduct: (product: Product) => void;
 
     toggleRowSelection: (
         checked: boolean | "indeterminate",
@@ -36,6 +50,7 @@ export function StockMovementTable({
     toggleRowSelection,
     toggleSelectAllEdited,
     setSelectedMovement,
+    setSelectedProduct,
     setShowPrevious,
     setViewOpen,
 }: StockMovementTableProps) {
@@ -169,17 +184,27 @@ export function StockMovementTable({
 
                                 <td className="px-3 py-2">
 
-                                    <div className="space-y-1">
+                                    <button
+                                        type="button"
+                                        className="group text-left"
+                                        onClick={() => {
+                                            setSelectedProduct(movement.product as Product);
+                                        }}
+                                    >
 
-                                        <p className="font-medium">
-                                            {movement.product.name}
-                                        </p>
+                                        <div className="space-y-1">
 
-                                        <Badge variant="secondary">
-                                            {movement.product.sku}
-                                        </Badge>
+                                            <p className="font-medium transition-colors group-hover:text-primary group-hover:underline">
+                                                {movement.product.name}
+                                            </p>
 
-                                    </div>
+                                            <Badge variant="secondary">
+                                                {movement.product.sku}
+                                            </Badge>
+
+                                        </div>
+
+                                    </button>
 
                                 </td>
 
