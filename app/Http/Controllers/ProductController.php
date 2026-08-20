@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\StockMovementService;
 use App\Models\StockMovement;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -258,8 +259,12 @@ class ProductController extends Controller
         return redirect()->route('products.index');
     }
 
-    public function duplicate(Product $product)
+   public function duplicate(Product $product)
     {
+        // Store the original quantity before creating the copy
+        $originalQuantity = (int) $product->quantity;
+
+        // Create the duplicated product
         $copy = $product->replicate();
 
         $copy->sku = $product->sku . '-COPY-' . now()->timestamp;
@@ -267,20 +272,68 @@ class ProductController extends Controller
 
         $copy->save();
 
+        // Record the duplication in the stock movement ledger
         StockMovement::create([
             'product_id' => $copy->id,
             'user_id' => auth()->id(),
             'type' => 'DUPLICATED',
-            'quantity' => 0,
-            'before_quantity' => $product->quantity,
-            'after_quantity' => $copy->quantity,
+
+            // The duplicated product starts with the same stock
+            'quantity' => $originalQuantity,
+
+            // Original product's stock
+            'before_quantity' => $originalQuantity,
+
+            // Duplicated product's starting stock
+            'after_quantity' => (int) $copy->quantity,
+
             'before_data' => $product->toArray(),
             'after_data' => $copy->toArray(),
-            'remarks' => 'Duplicated from SKU: '.$product->sku,
+
+            'remarks' => 'Duplicated from SKU: ' . $product->sku,
         ]);
 
         return redirect()->back();
     }
+
+    public function archived(Request $request)
+    {
+        $products = Product::query()
+            ->where('archived', true)
+            ->when(
+                $request->search,
+                function ($query, $search) {
+                    $query->where(function ($query) use ($search) {
+                        $query
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('sku', 'like', "%{$search}%")
+                            ->orWhere('barcode', 'like', "%{$search}%")
+                            ->orWhere('supplier', 'like', "%{$search}%")
+                            ->orWhere('category', 'like', "%{$search}%");
+                    });
+                }
+            )
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return inertia('products/archived', [
+            'products' => $products,
+            'filters' => [
+                'search' => $request->search,
+            ],
+        ]);
+    }
+
+    public function restore(Product $product)
+    {
+        $product->update([
+            'archived' => false,
+        ]);
+
+        return redirect()->back();
+    }
+
     public function status(Request $request, Product $product)
     {
         $request->validate([
