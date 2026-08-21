@@ -88,6 +88,10 @@ type Props = {
     >;
 
     getStatusColor: (status: string) => string;
+
+    archiveProduct: (product: Product) => void;
+
+    duplicateProduct: (product: Product) => void;
 };
 
 export function ProductsTable({
@@ -106,6 +110,8 @@ export function ProductsTable({
     setNewStatus,
     setStatusOpen,
     getStatusColor,
+    archiveProduct,
+    duplicateProduct,
 }: Props) {
     const allSelected =
         products.length > 0 &&
@@ -351,37 +357,11 @@ export function ProductsTable({
                                             {/* DUPLICATE */}
 
                                             <DropdownMenuItem
-                                                onClick={() => {
-
-                                                    router.post(
-                                                        `/products/${product.id}/duplicate`,
-                                                        {},
-                                                        {
-                                                            preserveScroll:
-                                                                true,
-
-                                                            onSuccess:
-                                                                () => {
-
-                                                                    router.reload(
-                                                                        {
-                                                                            only: [
-                                                                                "products",
-                                                                            ],
-                                                                        }
-                                                                    );
-
-                                                                },
-                                                        }
-                                                    );
-
-                                                }}
+                                                onClick={() => duplicateProduct(product)}
                                             >
-
                                                 <Copy className="mr-2 h-4 w-4" />
 
                                                 Duplicate
-
                                             </DropdownMenuItem>
 
                                             <DropdownMenuSeparator />
@@ -389,37 +369,11 @@ export function ProductsTable({
                                             {/* ARCHIVE */}
 
                                             <DropdownMenuItem
-                                                onClick={() => {
-
-                                                    router.patch(
-                                                        `/products/${product.id}/archive`,
-                                                        {},
-                                                        {
-                                                            preserveScroll:
-                                                                true,
-
-                                                            onSuccess:
-                                                                () => {
-
-                                                                    router.reload(
-                                                                        {
-                                                                            only: [
-                                                                                "products",
-                                                                            ],
-                                                                        }
-                                                                    );
-
-                                                                },
-                                                        }
-                                                    );
-
-                                                }}
+                                                onClick={() => archiveProduct(product)}
                                             >
-
                                                 <Archive className="mr-2 h-4 w-4" />
 
                                                 Archive
-
                                             </DropdownMenuItem>
 
                                             {/* DELETE */}

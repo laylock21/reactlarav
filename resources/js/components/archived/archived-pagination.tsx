@@ -14,7 +14,7 @@ type ArchivedPaginationProps = {
     lastPage: number;
     prevPageUrl: string | null;
     nextPageUrl: string | null;
-    links?: PaginationLink[];
+    links: PaginationLink[];
 };
 
 export function ArchivedPagination({
@@ -22,7 +22,7 @@ export function ArchivedPagination({
     lastPage,
     prevPageUrl,
     nextPageUrl,
-    links = [],
+    links,
 }: ArchivedPaginationProps) {
 
     if (lastPage <= 1) {
@@ -38,8 +38,8 @@ export function ArchivedPagination({
             url,
             {},
             {
-                preserveState: true,
                 preserveScroll: true,
+                preserveState: true,
             }
         );
     };
@@ -47,11 +47,17 @@ export function ArchivedPagination({
     return (
         <div className="mt-4 flex shrink-0 items-center justify-between">
 
+            {/* Page Information */}
+
             <p className="text-sm text-muted-foreground">
                 Page {currentPage} of {lastPage}
             </p>
 
+            {/* Pagination */}
+
             <div className="flex items-center gap-2">
+
+                {/* Previous */}
 
                 <Button
                     variant="outline"
@@ -60,8 +66,11 @@ export function ArchivedPagination({
                     onClick={() => navigate(prevPageUrl)}
                 >
                     <ArrowLeft className="mr-1 h-4 w-4" />
+
                     Previous
                 </Button>
+
+                {/* Page Numbers */}
 
                 {links
                     .filter(
@@ -85,6 +94,8 @@ export function ArchivedPagination({
                         </Button>
                     ))}
 
+                {/* Next */}
+
                 <Button
                     variant="outline"
                     size="sm"
@@ -92,6 +103,7 @@ export function ArchivedPagination({
                     onClick={() => navigate(nextPageUrl)}
                 >
                     Next
+
                     <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
 

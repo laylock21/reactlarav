@@ -66,17 +66,15 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                 }}
                                 tooltip={{ children: item.title }}
                             >
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
                                     {item.icon && <item.icon />}
 
-                                    <span className="flex-1">
+                                    <span className="flex-1 truncate">
                                         {item.title}
                                     </span>
                                 </div>
 
-                                {/* Dropdown toggle */}
-                                <button
-                                    type="button"
+                                <ChevronRight
                                     onClick={(event) => {
                                         event.preventDefault();
                                         event.stopPropagation();
@@ -86,15 +84,17 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                             [item.title]: !prev[item.title],
                                         }));
                                     }}
-                                    className="flex h-6 w-6 items-center justify-center rounded-sm hover:bg-sidebar-accent"
-                                    aria-label={`Toggle ${item.title} submenu`}
-                                >
-                                    <ChevronRight
-                                        className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                                            isOpen ? "rotate-90" : ""
-                                        }`}
-                                    />
-                                </button>
+                                    className={`
+                                        h-4
+                                        w-4
+                                        shrink-0
+                                        cursor-pointer
+                                        transition-transform
+                                        duration-500
+                                        ease-[cubic-bezier(0.22,1,0.36,1)]
+                                        ${isOpen ? "rotate-90" : ""}
+                                    `}
+                                />
                             </SidebarMenuButton>
 
                             <div

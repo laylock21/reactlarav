@@ -1,5 +1,7 @@
 import { Head, router } from "@inertiajs/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { ArchiveRestore } from "lucide-react";
+import products from "@/routes/products";
 import { toast } from "sonner";
 
 import {
@@ -7,19 +9,19 @@ import {
     CardContent,
     CardHeader,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 import { ArchivedToolbar } from "@/components/archived/archived-toolbar";
 import { ArchivedTable } from "@/components/archived/archived-table";
 import { ArchivedPagination } from "@/components/archived/archived-pagination";
+import { ArchivedProductViewDialog } from "@/components/archived/archived-product-view-dialog";
 
 import type {
     ArchivedProduct,
-    ArchivedProducts,
+    ArchivedProductsResponse,
 } from "@/components/archived/archived-types";
 
 type Props = {
-    products: ArchivedProducts;
+    products: ArchivedProductsResponse;
 
     filters?: {
         search?: string;
@@ -30,132 +32,6 @@ export default function Archived({
     products: productList,
     filters,
 }: Props) {
-    const [search, setSearch] = useState(
-        filters?.search ?? ""
-    );
-
-    const [selectedRows, setSelectedRows] = useState<number[]>([]);
-
-    const [productsData, setProductsData] = useState<ArchivedProduct[]>(
-        productList.data
-    );
-
-    /*
-    |--------------------------------------------------------------------------
-    | Keep local table data synchronized with Laravel
-    |--------------------------------------------------------------------------
-    */
-
-    useEffect(() => {
-        setProductsData(productList.data);
-    }, [productList.data]);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Search
-    |--------------------------------------------------------------------------
-    */
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            router.get(
-                "/products/archived",
-                {
-                    search,
-                },
-                {
-                    preserveState: true,
-                    preserveScroll: true,
-                    replace: true,
-                }
-            );
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [search]);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Selected products
-    |--------------------------------------------------------------------------
-    */
-
-    const allSelected =
-        productsData.length > 0 &&
-        selectedRows.length === productsData.length;
-
-    const toggleRow = (
-        productId: number,
-        checked: boolean
-    ) => {
-        if (checked) {
-            setSelectedRows((prev) => [
-                ...new Set([...prev, productId]),
-            ]);
-
-            return;
-        }
-
-        setSelectedRows((prev) =>
-            prev.filter((id) => id !== productId)
-        );
-    };
-
-    const toggleAll = () => {
-        if (allSelected) {
-            setSelectedRows([]);
-            return;
-        }
-
-        setSelectedRows(
-            productsData.map((product) => product.id)
-        );
-    };
-
-    /*
-    |--------------------------------------------------------------------------
-    | Restore
-    |--------------------------------------------------------------------------
-    */
-
-    const restoreProduct = (
-        product: ArchivedProduct
-    ) => {
-        router.patch(
-            `/products/${product.id}/restore`,
-            {},
-            {
-                preserveScroll: true,
-
-                onSuccess: () => {
-                    setSelectedRows((prev) =>
-                        prev.filter(
-                            (id) => id !== product.id
-                        )
-                    );
-
-                    toast.success(
-                        "Product restored successfully.",
-                        {
-                            description: `${product.name} has been restored.`,
-                        }
-                    );
-                },
-
-                onError: () => {
-                    toast.error(
-                        "Unable to restore product."
-                    );
-                },
-            }
-        );
-    };
-
-    /*
-    |--------------------------------------------------------------------------
-    | Restore selected
-    |--------------------------------------------------------------------------
-    */
 
     const restoreSelected = () => {
         if (selectedRows.length === 0) {
@@ -174,19 +50,142 @@ export default function Archived({
             );
         });
 
+        setProductsData((prev) =>
+            prev.filter((product) => !ids.includes(product.id))
+        );
+
         setSelectedRows([]);
 
         toast.success(
-            `${ids.length} products restored.`,
+            `${ids.length} products restored successfully.`,
             {
                 description:
                     "The selected products have been restored.",
             }
         );
+    };
 
-        router.reload({
-            only: ["products"],
-        });
+    /*
+    |--------------------------------------------------------------------------
+    | Search
+    |--------------------------------------------------------------------------
+    */
+
+    const [search, setSearch] = useState(
+        filters?.search ?? ""
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Local Product Data
+    |--------------------------------------------------------------------------
+    */
+
+    const [productsData, setProductsData] = useState<
+        ArchivedProduct[]
+    >(productList.data);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Selected Rows
+    |--------------------------------------------------------------------------
+    */
+
+    const [selectedRows, setSelectedRows] = useState<number[]>(
+        []
+    );
+
+    const [selectedProduct, setSelectedProduct] =
+        useState<ArchivedProduct | null>(null);
+
+    const [viewOpen, setViewOpen] = useState(false);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Synchronize backend data
+    |--------------------------------------------------------------------------
+    */
+
+    useEffect(() => {
+        setProductsData(productList.data);
+    }, [productList.data]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Select All
+    |--------------------------------------------------------------------------
+    */
+
+    const allSelected =
+        productsData.length > 0 &&
+        selectedRows.length === productsData.length;
+
+    const toggleRowSelection = (
+        productId: number,
+        checked: boolean
+    ) => {
+
+        if (checked) {
+
+            setSelectedRows((prev) => [
+                ...new Set([
+                    ...prev,
+                    productId,
+                ]),
+            ]);
+
+            return;
+        }
+
+        setSelectedRows((prev) =>
+            prev.filter(
+                (id) => id !== productId
+            )
+        );
+    };
+
+    const toggleSelectAll = () => {
+
+        if (allSelected) {
+            setSelectedRows([]);
+            return;
+        }
+
+        setSelectedRows(
+            productsData.map(
+                (product) => product.id
+            )
+        );
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Restore
+    |--------------------------------------------------------------------------
+    */
+
+    const restoreProduct = (product: ArchivedProduct) => {
+        router.patch(
+            `/products/${product.id}/restore`,
+            {},
+            {
+                preserveScroll: true,
+
+                onSuccess: () => {
+                    setProductsData((prev) =>
+                        prev.filter(
+                            (item) => item.id !== product.id
+                        )
+                    );
+
+                    setSelectedRows((prev) =>
+                        prev.filter(
+                            (id) => id !== product.id
+                        )
+                    );
+                },
+            }
+        );
     };
 
     /*
@@ -195,43 +194,36 @@ export default function Archived({
     |--------------------------------------------------------------------------
     */
 
-    const deleteProduct = (
-        product: ArchivedProduct
-    ) => {
+    const deleteProduct = (product: ArchivedProduct) => {
         router.delete(
             `/products/${product.id}`,
             {
                 preserveScroll: true,
 
                 onSuccess: () => {
-                    setSelectedRows((prev) =>
-                        prev.filter(
-                            (id) => id !== product.id
-                        )
+                    setProductsData((prev) =>
+                        prev.filter((item) => item.id !== product.id)
                     );
 
-                    toast.success(
-                        "Product deleted permanently.",
-                        {
-                            description: `${product.name} has been permanently deleted.`,
-                        }
+                    setSelectedRows((prev) =>
+                        prev.filter((id) => id !== product.id)
                     );
+
+                    toast.success("Product deleted successfully.", {
+                        description:
+                            "The archived product has been permanently deleted.",
+                    });
                 },
 
                 onError: () => {
-                    toast.error(
-                        "Unable to delete product."
-                    );
+                    toast.error("Unable to delete product.", {
+                        description:
+                            "There was an error while deleting the archived product.",
+                    });
                 },
             }
         );
     };
-
-    /*
-    |--------------------------------------------------------------------------
-    | Delete selected
-    |--------------------------------------------------------------------------
-    */
 
     const deleteSelected = () => {
         if (selectedRows.length === 0) {
@@ -249,15 +241,19 @@ export default function Archived({
             );
         });
 
+        setProductsData((prev) =>
+            prev.filter((product) => !ids.includes(product.id))
+        );
+
         setSelectedRows([]);
 
         toast.success(
-            `${ids.length} products deleted permanently.`
+            `${ids.length} products deleted successfully.`,
+            {
+                description:
+                    "The selected archived products have been permanently deleted.",
+            }
         );
-
-        router.reload({
-            only: ["products"],
-        });
     };
 
     /*
@@ -266,77 +262,122 @@ export default function Archived({
     |--------------------------------------------------------------------------
     */
 
-    const viewProduct = (
-        product: ArchivedProduct
-    ) => {
-        router.visit(
-            `/products/${product.id}`
-        );
+    const viewProduct = (product: ArchivedProduct) => {
+        setSelectedProduct(product);
+        setViewOpen(true);
     };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Page
+    |--------------------------------------------------------------------------
+    */
 
     return (
         <>
             <Head title="Archived Products" />
 
-            <div className="flex h-full min-h-0 flex-col space-y-6 overflow-hidden p-6">
+            <div className="
+                flex
+                h-full
+                min-h-0
+                flex-col
+                space-y-6
+                overflow-hidden
+                p-6
+            ">
 
                 {/* Page Header */}
 
-                <div className="flex shrink-0 items-center justify-between">
+                <div className="shrink-0">
 
-                    <div>
-                        <h1 className="text-3xl font-bold">
-                            Archived Products
-                        </h1>
+                    <h1 className="text-3xl font-bold">
+                        Archived Products
+                    </h1>
 
-                        <p className="text-muted-foreground">
-                            Manage products that have been moved to the archive.
-                        </p>
-                    </div>
+                    <p className="text-muted-foreground">
+                        Manage products that have been moved to the archive.
+                    </p>
 
                 </div>
 
                 {/* Main Card */}
 
-                <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <Card className="
+                    flex
+                    min-h-0
+                    flex-1
+                    flex-col
+                    overflow-hidden
+                ">
 
                     {/* Toolbar */}
 
-                    <CardHeader className="shrink-0 px-6 py-5">
+                    <CardHeader className="
+                        shrink-0
+                        px-6
+                        py-5
+                    ">
 
                         <ArchivedToolbar
                             search={search}
                             setSearch={setSearch}
                             selectedRows={selectedRows}
-                            onRestoreSelected={restoreSelected}
-                            onDeleteSelected={deleteSelected}
+                            onRestoreSelected={
+                                restoreSelected
+                            }
+                            onDeleteSelected={
+                                deleteSelected
+                            }
                         />
 
                     </CardHeader>
 
-                    {/* Table */}
+                    {/* Table + Pagination */}
 
-                    <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                    <CardContent className="
+                        flex
+                        min-h-0
+                        flex-1
+                        flex-col
+                        overflow-hidden
+                    ">
 
                         <ArchivedTable
                             products={productsData}
                             selectedRows={selectedRows}
-                            onToggleRow={toggleRow}
-                            onToggleAll={toggleAll}
                             allSelected={allSelected}
-                            onRestore={restoreProduct}
-                            onDelete={deleteProduct}
+                            toggleRowSelection={
+                                toggleRowSelection
+                            }
+                            toggleSelectAll={
+                                toggleSelectAll
+                            }
                             onView={viewProduct}
+                            onRestore={
+                                restoreProduct
+                            }
+                            onDelete={
+                                deleteProduct
+                            }
                         />
 
-                        {/* Pagination */}
-
                         <ArchivedPagination
-                            currentPage={productList.current_page}
-                            lastPage={productList.last_page}
-                            prevPageUrl={productList.prev_page_url}
-                            nextPageUrl={productList.next_page_url}
-                            links={[]}
+                            currentPage={
+                                productList.current_page
+                            }
+                            lastPage={
+                                productList.last_page
+                            }
+                            prevPageUrl={
+                                productList.prev_page_url
+                            }
+                            nextPageUrl={
+                                productList.next_page_url
+                            }
+                            links={
+                                productList.links ?? []
+                            }
                         />
 
                     </CardContent>
@@ -344,6 +385,19 @@ export default function Archived({
                 </Card>
 
             </div>
+
+            <ArchivedProductViewDialog
+                open={viewOpen}
+                onOpenChange={setViewOpen}
+                product={selectedProduct}
+                onRestore={() => {
+                    if (!selectedProduct) return;
+
+                    restoreProduct(selectedProduct);
+                    setViewOpen(false);
+                    setSelectedProduct(null);
+                }}
+            />
         </>
     );
 }

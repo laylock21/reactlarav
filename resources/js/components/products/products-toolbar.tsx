@@ -17,6 +17,7 @@ import {
     Upload,
     Trash2,
     Plus,
+    Archive,
 } from "lucide-react";
 
 import type {
@@ -42,6 +43,7 @@ type Props = {
     setBulkDelete: (value: boolean) => void;
     setDeleteTarget: (product: Product | null) => void;
     setDeleteOpen: (open: boolean) => void;
+    archiveSelected: () => void;
 };
 
 export function ProductsToolbar({
@@ -60,6 +62,8 @@ export function ProductsToolbar({
     setBulkDelete,
     setDeleteTarget,
     setDeleteOpen,
+    archiveSelected,
+
 }: Props) {
     const emptyForm: ProductForm = {
         sku: "",
@@ -212,6 +216,33 @@ export function ProductsToolbar({
                     </DropdownMenuContent>
 
                 </DropdownMenu>
+
+                {/* Archive */}
+                <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={selectedRows.length === 0}
+                    onClick={archiveSelected}
+                    className="transition-colors duration-300 ease-out"
+                >
+                    <Archive
+                        className={`mr-2 h-4 w-4 transition-all duration-200 ${
+                            selectedRows.length > 0
+                                ? "text-orange-600 scale-100"
+                                : "text-muted-foreground scale-95"
+                        }`}
+                    />
+
+                    <span
+                        className={`transition-all duration-200 ${
+                            selectedRows.length > 0
+                                ? "text-orange-600 scale-100"
+                                : "text-muted-foreground scale-95"
+                        }`}
+                    >
+                        Archive
+                    </span>
+                </Button>
 
                 {/* Delete */}
                 <Button

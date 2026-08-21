@@ -317,7 +317,7 @@ class ProductController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return inertia('products/archived', [
+        return inertia('archived', [
             'products' => $products,
             'filters' => [
                 'search' => $request->search,
@@ -421,6 +421,22 @@ class ProductController extends Controller
             'remarks' => 'Product archived.',
         ]);
 
-        return redirect()->back();
+        return to_route('products.index');
+    }
+
+    public function restoreBulk(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'required|integer|exists:products,id',
+        ]);
+
+        Product::whereIn('id', $validated['ids'])
+            ->where('archived', true)
+            ->update([
+                'archived' => false,
+            ]);
+
+        return back();
     }
 }

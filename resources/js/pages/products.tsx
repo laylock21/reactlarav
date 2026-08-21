@@ -71,6 +71,12 @@ type Props = {
 
         next_page_url: string | null;
     };
+
+    getStatusColor: (status: string) => string;
+
+    archiveProduct: (product: Product) => void;
+
+    duplicateProduct: (product: Product) => void;
 };
 
 export default function Products({ products: productList }: Props) {
@@ -94,6 +100,34 @@ export default function Products({ products: productList }: Props) {
         description: "",
         archived: false,
     };
+
+const archiveSelected = () => {
+    if (selectedRows.length === 0) {
+        return;
+    }
+
+    const ids = [...selectedRows];
+
+    ids.forEach((id) => {
+        router.patch(products.archive(id).url, {}, {
+            preserveScroll: true,
+        });
+    });
+
+    setProductsData((prev) =>
+        prev.filter((product) => !ids.includes(product.id))
+    );
+
+    setSelectedRows([]);
+
+    toast.success(
+        `${ids.length} products archived successfully.`,
+        {
+            description:
+                "The selected products have been moved to the archived products.",
+        }
+    );
+};
 
 const [form, setForm] = useState<ProductForm>(emptyForm);
     const [statusFilter, setStatusFilter] =
@@ -152,6 +186,55 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
             });
         }
     };
+
+   const archiveProduct = (product: Product) => {
+        router.patch(products.archive(product.id).url, {}, {
+            preserveScroll: true,
+
+            onSuccess: () => {
+                router.reload({
+                    only: ["products"],
+                });
+
+                toast.success("Product archived successfully.", {
+                    description:
+                        "The product has been moved to the archived products.",
+                });
+            },
+
+            onError: () => {
+                toast.error("Unable to archive product.", {
+                    description:
+                        "There was an error while archiving the product.",
+                });
+            },
+        });
+    };
+
+    const duplicateProduct = (product: Product) => {
+        router.post(products.duplicate(product.id).url, {}, {
+            preserveScroll: true,
+
+            onSuccess: () => {
+                router.reload({
+                    only: ["products"],
+                });
+
+                toast.success("Product duplicated successfully.", {
+                    description:
+                        "A copy of the product has been created successfully.",
+                });
+            },
+
+            onError: () => {
+                toast.error("Unable to duplicate product.", {
+                    description:
+                        "There was an error while duplicating the product.",
+                });
+            },
+        });
+    };
+
     const confirmDelete = () => {
         if (deleteTarget) {
             router.delete(products.destroy(deleteTarget.id).url, {
@@ -289,6 +372,7 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                             setBulkDelete={setBulkDelete}
                             setDeleteTarget={setDeleteTarget}
                             setDeleteOpen={setDeleteOpen}
+                            archiveSelected={archiveSelected}
                         />
                     </CardHeader>
                     <CardContent className="px-8 pb-6 flex flex-col overflow-hidden">
@@ -308,6 +392,8 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                             setNewStatus={setNewStatus}
                             setStatusOpen={setStatusOpen}
                             getStatusColor={getStatusColor}
+                            archiveProduct={archiveProduct}
+                            duplicateProduct={duplicateProduct}
                         />
                     </CardContent>
                 </Card>

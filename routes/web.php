@@ -6,10 +6,12 @@ use App\Http\Controllers\ProductController;
 Route::inertia('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    
 
-    Route::inertia('dashboard', 'dashboard')
+    Route::inertia('dashboard', 'dashboard')    
         ->name('dashboard');
+
+    Route::get('/products/archived', [ProductController::class, 'archived'])
+        ->name('products.archived');
 
     Route::resource('products', ProductController::class);
 
@@ -58,6 +60,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::patch('/products/{product}/restore', [ProductController::class, 'restore'])
         ->name('products.restore');
+
+    Route::patch('/products/restore-bulk', [ProductController::class, 'restoreBulk'])
+    ->name('products.restore-bulk');
 });
 
 require __DIR__.'/settings.php';
