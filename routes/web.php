@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -17,6 +18,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/products/export/csv', [ProductController::class, 'exportCsv'])
         ->name('products.export.csv');
+
+    Route::resource('categories', CategoryController::class)
+    ->only([
+        'index',
+        'store',
+        'update',
+        'destroy',
+    ]);
 
     Route::get('/products/export/pdf', [ProductController::class, 'exportPdf'])
         ->name('products.export.pdf');
@@ -63,6 +72,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::patch('/products/restore-bulk', [ProductController::class, 'restoreBulk'])
     ->name('products.restore-bulk');
+
+    Route::get('/categories', [CategoryController::class, 'index'])
+    ->name('categories.index');
 });
 
 require __DIR__.'/settings.php';
