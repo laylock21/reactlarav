@@ -20,9 +20,17 @@ import { CategoriesPagination } from "@/components/categories/categories-paginat
 import type {
     Category,
     CategoryForm,
+    SubCategory,
+    SubCategoryForm,
+    Tag,
+    TagForm,
 } from "@/components/categories/categories-types";
 
-import { emptyCategoryForm } from "@/components/categories/categories-types";
+import {
+    emptyCategoryForm,
+    emptySubCategoryForm,
+    emptyTagForm,
+} from "@/components/categories/categories-types";
 
 type Props = {
     categories: {
@@ -93,6 +101,30 @@ export default function Categories({
 
     /*
     |--------------------------------------------------------------------------
+    | Sub-category Dialog
+    |--------------------------------------------------------------------------
+    */
+
+    const [subCategoryOpen, setSubCategoryOpen] =
+        useState(false);
+
+    const [subCategoryCategory, setSubCategoryCategory] =
+        useState<Category | null>(null);
+
+    const [subCategoryName, setSubCategoryName] =
+        useState("");
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tag Dialog
+    |--------------------------------------------------------------------------
+    */
+
+    const [tagSubCategory, setTagSubCategory] =
+        useState<SubCategory | null>(null);
+
+    /*
+    |--------------------------------------------------------------------------
     | Editing
     |--------------------------------------------------------------------------
     */
@@ -110,6 +142,57 @@ export default function Categories({
         useState<CategoryForm>(
             emptyCategoryForm
         );
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Tag Dialog
+    |--------------------------------------------------------------------------
+    */
+
+    const [tagOpen, setTagOpen] =
+        useState(false);
+
+    const [selectedSubCategory, setSelectedSubCategory] =
+        useState<number | null>(null);
+
+    const [tagName, setTagName] =
+        useState("");
+    /*
+    |--------------------------------------------------------------------------
+    | Sub-category
+    |--------------------------------------------------------------------------
+    */
+
+    const [subCategoryForm, setSubCategoryForm] =
+        useState<SubCategoryForm>(
+            emptySubCategoryForm
+        );
+
+    const [editingSubCategory, setEditingSubCategory] =
+        useState<number | null>(null);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tag
+    |--------------------------------------------------------------------------
+    */
+
+    const [tagForm, setTagForm] =
+        useState<TagForm>(
+            emptyTagForm
+        );
+
+    const [editingTag, setEditingTag] =
+        useState<number | null>(null);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Expanded Categories
+    |--------------------------------------------------------------------------
+    */
+
+    const [expandedCategories, setExpandedCategories] =
+        useState<number[]>([]);
 
     /*
     |--------------------------------------------------------------------------
@@ -244,6 +327,229 @@ export default function Categories({
             }
         );
     };
+    /*
+    |--------------------------------------------------------------------------
+    | Save Sub-category
+    |--------------------------------------------------------------------------
+    */
+
+    const saveSubCategory = () => {
+
+        if (
+            !subCategoryForm.category_id
+        ) {
+            toast.error(
+                "Category is required."
+            );
+
+            return;
+        }
+
+        if (editingSubCategory) {
+
+            router.put(
+                `/sub-categories/${editingSubCategory}`,
+                {
+                    name: subCategoryForm.name,
+                    description:
+                        subCategoryForm.description,
+                },
+                {
+                    preserveScroll: true,
+
+                    onSuccess: () => {
+                        setEditingSubCategory(null);
+
+                        setSubCategoryForm(
+                            emptySubCategoryForm
+                        );
+
+                        toast.success(
+                            "Sub-category updated successfully."
+                        );
+                    },
+
+                    onError: () => {
+                        toast.error(
+                            "Unable to update sub-category."
+                        );
+                    },
+                }
+            );
+
+            return;
+        }
+
+        router.post(
+            `/categories/${subCategoryForm.category_id}/sub-categories`,
+            {
+                name: subCategoryForm.name,
+                description:
+                    subCategoryForm.description,
+            },
+            {
+                preserveScroll: true,
+
+                onSuccess: () => {
+                    setSubCategoryForm(
+                        emptySubCategoryForm
+                    );
+
+                    toast.success(
+                        "Sub-category added successfully."
+                    );
+                },
+
+                onError: () => {
+                    toast.error(
+                        "Unable to add sub-category."
+                    );
+                },
+            }
+        );
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Save Tag
+    |--------------------------------------------------------------------------
+    */
+
+    const saveTag = () => {
+
+        if (
+            !tagForm.sub_category_id
+        ) {
+            toast.error(
+                "Sub-category is required."
+            );
+
+            return;
+        }
+
+        if (editingTag) {
+
+            router.put(
+                `/tags/${editingTag}`,
+                {
+                    name: tagForm.name,
+                },
+                {
+                    preserveScroll: true,
+
+                    onSuccess: () => {
+                        setEditingTag(null);
+
+                        setTagForm(
+                            emptyTagForm
+                        );
+
+                        toast.success(
+                            "Tag updated successfully."
+                        );
+                    },
+
+                    onError: () => {
+                        toast.error(
+                            "Unable to update tag."
+                        );
+                    },
+                }
+            );
+
+            return;
+        }
+
+        router.post(
+            `/sub-categories/${tagForm.sub_category_id}/tags`,
+            {
+                name: tagForm.name,
+            },
+            {
+                preserveScroll: true,
+
+                onSuccess: () => {
+                    setTagForm(
+                        emptyTagForm
+                    );
+
+                    toast.success(
+                        "Tag added successfully."
+                    );
+                },
+
+                onError: () => {
+                    toast.error(
+                        "Unable to add tag."
+                    );
+                },
+            }
+        );
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Sub-category
+    |--------------------------------------------------------------------------
+    */
+
+    const deleteSubCategory = (
+        subCategory: SubCategory
+    ) => {
+
+        router.delete(
+            `/sub-categories/${subCategory.id}`,
+            {
+                preserveScroll: true,
+
+                onSuccess: () => {
+
+                    toast.success(
+                        "Sub-category deleted successfully."
+                    );
+                },
+
+                onError: () => {
+
+                    toast.error(
+                        "Unable to delete sub-category."
+                    );
+                },
+            }
+        );
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Tag
+    |--------------------------------------------------------------------------
+    */
+
+    const deleteTag = (
+        tag: Tag
+    ) => {
+
+        router.delete(
+            `/tags/${tag.id}`,
+            {
+                preserveScroll: true,
+
+                onSuccess: () => {
+
+                    toast.success(
+                        "Tag deleted successfully."
+                    );
+                },
+
+                onError: () => {
+
+                    toast.error(
+                        "Unable to delete tag."
+                    );
+                },
+            }
+        );
+    };
 
     /*
     |--------------------------------------------------------------------------
@@ -366,6 +672,26 @@ export default function Categories({
         );
     };
 
+    /*
+    |--------------------------------------------------------------------------
+    | Toggle Category
+    |--------------------------------------------------------------------------
+    */
+
+    const toggleCategory = (
+        categoryId: number
+    ) => {
+        setExpandedCategories((prev) =>
+            prev.includes(categoryId)
+                ? prev.filter(
+                    (id) => id !== categoryId
+                )
+                : [
+                    ...prev,
+                    categoryId,
+                ]
+        );
+    };
     /*
     |--------------------------------------------------------------------------
     | Edit
@@ -491,6 +817,36 @@ export default function Categories({
                             onDelete={
                                 deleteCategory
                             }
+                            expandedCategories={
+                                expandedCategories
+                            }
+                            onToggleCategory={
+                                toggleCategory
+                            }
+
+                            onAddSubCategory={
+                                (category) => {
+                                    setSubCategoryCategory(
+                                        category
+                                    );
+
+                                    setSubCategoryName("");
+
+                                    setSubCategoryOpen(true);
+                                }
+                            }
+
+                            onAddTag={
+                                (subCategory) => {
+                                    setTagSubCategory(
+                                        subCategory
+                                    );
+
+                                    setTagName("");
+
+                                    setTagOpen(true);
+                                }
+                            }
                         />
 
                         {/* PAGINATION */}
@@ -600,6 +956,66 @@ export default function Categories({
 
             </Dialog>
 
+            {/* TAG DIALOG */}
+
+            <Dialog
+                open={tagOpen}
+                onOpenChange={setTagOpen}
+            >
+                <DialogContent>
+
+                    <DialogHeader>
+
+                        <DialogTitle>
+                            Add Tag
+                        </DialogTitle>
+
+                        <DialogDescription>
+                            Add a tag to this sub-category.
+                        </DialogDescription>
+
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+
+                        <Input
+                            placeholder="Tag name"
+                            value={tagName}
+                            onChange={(event) =>
+                                setTagName(
+                                    event.target.value
+                                )
+                            }
+                        />
+
+                    </div>
+
+                    <DialogFooter>
+
+                        <Button
+                            variant="outline"
+                            onClick={() =>
+                                setTagOpen(false)
+                            }
+                        >
+                            Cancel
+                        </Button>
+
+                        <Button
+                            onClick={saveTag}
+                            disabled={
+                                !tagName.trim() ||
+                                !selectedSubCategory
+                            }
+                        >
+                            Add Tag
+                        </Button>
+
+                    </DialogFooter>
+
+                </DialogContent>
+            </Dialog>
+
             {/* DELETE DIALOG */}
 
             <Dialog
@@ -680,6 +1096,144 @@ export default function Categories({
                             }}
                         >
                             Delete
+                        </Button>
+
+                    </DialogFooter>
+
+                </DialogContent>
+
+            </Dialog>
+
+            {/* SUB-CATEGORY DIALOG */}
+
+            <Dialog
+                open={subCategoryOpen}
+                onOpenChange={
+                    setSubCategoryOpen
+                }
+            >
+
+                <DialogContent>
+
+                    <DialogHeader>
+
+                        <DialogTitle>
+                            Add Sub-category
+                        </DialogTitle>
+
+                        <DialogDescription>
+                            Add a sub-category under{" "}
+                            <strong>
+                                {subCategoryCategory?.name}
+                            </strong>.
+                        </DialogDescription>
+
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+
+                        <Input
+                            placeholder="Sub-category name"
+                            value={subCategoryName}
+                            onChange={(event) =>
+                                setSubCategoryName(
+                                    event.target.value
+                                )
+                            }
+                        />
+
+                    </div>
+
+                    <DialogFooter>
+
+                        <Button
+                            variant="outline"
+                            onClick={() =>
+                                setSubCategoryOpen(
+                                    false
+                                )
+                            }
+                        >
+                            Cancel
+                        </Button>
+
+                        <Button
+                            disabled={
+                                !subCategoryName.trim()
+                            }
+                            onClick={
+                                saveSubCategory
+                            }
+                        >
+                            Add Sub-category
+                        </Button>
+
+                    </DialogFooter>
+
+                </DialogContent>
+
+            </Dialog>
+
+            {/* TAG DIALOG */}
+
+            <Dialog
+                open={tagOpen}
+                onOpenChange={
+                    setTagOpen
+                }
+            >
+
+                <DialogContent>
+
+                    <DialogHeader>
+
+                        <DialogTitle>
+                            Add Tag
+                        </DialogTitle>
+
+                        <DialogDescription>
+                            Add a tag under{" "}
+                            <strong>
+                                {tagSubCategory?.name}
+                            </strong>.
+                        </DialogDescription>
+
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+
+                        <Input
+                            placeholder="Tag name"
+                            value={tagName}
+                            onChange={(event) =>
+                                setTagName(
+                                    event.target.value
+                                )
+                            }
+                        />
+
+                    </div>
+
+                    <DialogFooter>
+
+                        <Button
+                            variant="outline"
+                            onClick={() =>
+                                setTagOpen(false)
+                            }
+                        >
+                            Cancel
+                        </Button>
+
+                        <Button
+                            disabled={
+                                !tagName.trim()
+                            }
+                            onClick={
+                                saveTag
+                            }
+                        >
+                            Add Tag
                         </Button>
 
                     </DialogFooter>

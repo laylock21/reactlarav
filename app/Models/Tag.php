@@ -4,19 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Category extends Model
+class Tag extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'sub_category_id',
         'name',
-        'description',
     ];
 
-    public function subCategories(): HasMany
+    public function subCategory(): BelongsTo
     {
-        return $this->hasMany(SubCategory::class);
+        return $this->belongsTo(SubCategory::class);
     }
 }

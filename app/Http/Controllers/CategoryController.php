@@ -17,7 +17,9 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $categories = Category::query()
-
+            ->with([
+                'subCategories.tags',
+            ])
             ->when(
                 $request->search,
                 function ($query, $search) {
@@ -28,11 +30,31 @@ class CategoryController extends Controller
                                 'description',
                                 'like',
                                 "%{$search}%"
+                            )
+                            ->orWhereHas(
+                                'subCategories',
+                                function ($query) use ($search) {
+                                    $query
+                                        ->where(
+                                            'name',
+                                            'like',
+                                            "%{$search}%"
+                                        )
+                                        ->orWhereHas(
+                                            'tags',
+                                            function ($query) use ($search) {
+                                                $query->where(
+                                                    'name',
+                                                    'like',
+                                                    "%{$search}%"
+                                                );
+                                            }
+                                        );
+                                }
                             );
                     });
                 }
             )
-
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -60,6 +82,48 @@ class CategoryController extends Controller
         ]);
 
         Category::create($validated);
+
+        return back();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store Sub-category
+    |--------------------------------------------------------------------------
+    */
+
+    public function storeSubCategory(
+        Request $request,
+        Category $category
+    ) {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $category->subCategories()->create([
+            'name' => $validated['name'],
+        ]);
+
+        return back();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store Tag
+    |--------------------------------------------------------------------------
+    */
+
+    public function storeTag(
+        Request $request,
+        \App\Models\SubCategory $subCategory
+    ) {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $subCategory->tags()->create([
+            'name' => $validated['name'],
+        ]);
 
         return back();
     }
