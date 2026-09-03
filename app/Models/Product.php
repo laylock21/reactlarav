@@ -2,48 +2,74 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'sku',
         'barcode',
         'name',
-        'supplier',
-        'category',
-        'unit',
+        'category_id',
+        'supplier_id',
         'quantity',
-        'minimum_stock',
         'cost_price',
         'selling_price',
+        'image_path',
         'status',
+        'is_active',
         'description',
-        'archived',
     ];
 
-    protected $archived = [
-    'sku',
-    'barcode',
-    'name',
-    'supplier',
-    'category',
-    'unit',
-    'quantity',
-    'minimum_stock',
-    'cost_price',
-    'selling_price',
-    'status',
-    'archived',
-    'description',
-];
+    protected $casts = [
+        'is_active' => 'boolean',
+        'cost_price' => 'decimal:2',
+        'selling_price' => 'decimal:2',
+    ];
 
-    public function movements()
+    // Relationships
+    public function category()
     {
-        return $this->hasMany(StockMovement::class);
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'product_tags', 'product_id', 'tag_id');
+    }
+
+    public function stocks()
+    {
+        return $this->hasMany(Stock::class, 'product_id');
+    }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class, 'product_id');
+    }
+
+    public function stockThreshold()
+    {
+        return $this->hasOne(StockThreshold::class, 'product_id');
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'product_id');
+    }
+
+    public function analyticsEvents()
+    {
+        return $this->hasMany(AnalyticsEvent::class, 'product_id');
+    }
+
+    public function analyticsSnapshots()
+    {
+        return $this->hasMany(AnalyticsSnapshot::class, 'product_id');
     }
 }
-

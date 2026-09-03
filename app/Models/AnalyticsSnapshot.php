@@ -4,19 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StockMovement extends Model
+class AnalyticsSnapshot extends Model
 {
     public $timestamps = false;
 
     protected $fillable = [
         'product_id',
-        'quantity_before',
-        'quantity_after',
-        'quantity_change',
-        'reason',
+        'snapshot_date',
+        'stock_quantity',
+        'total_sold',
+        'total_added',
+        'total_removed',
+        'total_revenue',
+        'total_returns',
     ];
 
     protected $casts = [
+        'snapshot_date' => 'date',
+        'total_revenue' => 'decimal:2',
         'created_at' => 'timestamp',
     ];
 

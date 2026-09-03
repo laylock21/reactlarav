@@ -4,23 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StockMovement extends Model
+class OrderItem extends Model
 {
-    public $timestamps = false;
-
     protected $fillable = [
+        'order_id',
         'product_id',
-        'quantity_before',
-        'quantity_after',
-        'quantity_change',
-        'reason',
+        'quantity',
+        'unit_price',
+        'total_amount',
     ];
 
     protected $casts = [
-        'created_at' => 'timestamp',
+        'unit_price' => 'decimal:2',
+        'total_amount' => 'decimal:2',
     ];
 
     // Relationships
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');

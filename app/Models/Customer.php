@@ -4,16 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StockMovement extends Model
+class Customer extends Model
 {
     public $timestamps = false;
 
     protected $fillable = [
-        'product_id',
-        'quantity_before',
-        'quantity_after',
-        'quantity_change',
-        'reason',
+        'name',
+        'email',
+        'phone',
+        'address',
     ];
 
     protected $casts = [
@@ -21,8 +20,8 @@ class StockMovement extends Model
     ];
 
     // Relationships
-    public function product()
+    public function orders()
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->hasMany(Order::class, 'customer_id');
     }
 }
