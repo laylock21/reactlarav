@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SubCategoryController;
+use App\Http\Controllers\TagController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -20,12 +22,63 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('products.export.csv');
 
     Route::resource('categories', CategoryController::class)
-    ->only([
-        'index',
-        'store',
-        'update',
-        'destroy',
-    ]);
+        ->only([
+            'index',
+            'store',
+            'update',
+            'destroy',
+        ]);
+
+    Route::post(
+        '/categories/{category}/sub-categories',
+        [CategoryController::class, 'storeSubCategory']
+    )->name('categories.sub-categories.store');
+
+    Route::post(
+        '/sub-categories/{subCategory}/tags',
+        [CategoryController::class, 'storeTag']
+    )->name('sub-categories.tags.store');
+
+    Route::post(
+        '/categories/{category}/sub-categories',
+        [SubCategoryController::class, 'store']
+    )->name('sub-categories.store');
+
+    Route::put(
+        '/sub-categories/{subCategory}',
+        [SubCategoryController::class, 'update']
+    )->name('sub-categories.update');
+
+    Route::delete(
+        '/sub-categories/{subCategory}',
+        [SubCategoryController::class, 'destroy']
+    )->name('sub-categories.destroy');
+
+
+    Route::post(
+        '/sub-categories/{subCategory}/tags',
+        [TagController::class, 'store']
+    )->name('tags.store');
+
+    Route::post(
+        '/sub-categories/{subCategory}/tags',
+        [TagController::class, 'store']
+    )->name('sub-categories.tags.store');
+
+    Route::delete(
+        '/tags/{tag}',
+        [TagController::class, 'destroy']
+    )->name('tags.destroy');
+
+    Route::put(
+        '/tags/{tag}',
+        [TagController::class, 'update']
+    )->name('tags.update');
+
+    Route::delete(
+        '/tags/{tag}',
+        [TagController::class, 'destroy']
+    )->name('tags.destroy');
 
     Route::get('/products/export/pdf', [ProductController::class, 'exportPdf'])
         ->name('products.export.pdf');
@@ -73,8 +126,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/products/restore-bulk', [ProductController::class, 'restoreBulk'])
     ->name('products.restore-bulk');
 
-    Route::get('/categories', [CategoryController::class, 'index'])
-    ->name('categories.index');
 });
 
 require __DIR__.'/settings.php';

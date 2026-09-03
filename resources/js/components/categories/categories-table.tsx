@@ -1,13 +1,16 @@
+import React from "react";
 import {
+    ChevronDown,
+    ChevronRight,
     Eye,
     MoreVertical,
     Pencil,
+    Plus,
     Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -25,7 +28,12 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-import type { Category } from "./categories-types";
+import { Badge } from "@/components/ui/badge";
+
+import type {
+    Category,
+    SubCategory,
+} from "./categories-types";
 
 type Props = {
     categories: Category[];
@@ -41,6 +49,42 @@ type Props = {
     onEdit: (category: Category) => void;
 
     onDelete: (category: Category) => void;
+
+    onAddSubCategory: (category: Category) => void;
+
+    onAddTag: (
+        subCategory: SubCategory
+    ) => void;
+
+    expandedCategories: number[];
+
+    onToggleCategory: (
+        categoryId: number
+    ) => void;
+
+    onEditSubCategory: (
+        subCategory: SubCategory
+    ) => void;
+
+    onDeleteSubCategory: (
+        subCategory: SubCategory
+    ) => void;
+
+    onEditTag: (
+        tag: Tag
+    ) => void;
+
+    onDeleteTag: (
+        tag: Tag
+    ) => void;
+};
+
+export type Tag = {
+    id: number;
+    sub_category_id: number;
+    name: string;
+    created_at?: string;
+    updated_at?: string;
 };
 
 export function CategoriesTable({
@@ -50,7 +94,21 @@ export function CategoriesTable({
     onView,
     onEdit,
     onDelete,
+    expandedCategories,
+    onToggleCategory,
+    onAddSubCategory,
+    onAddTag,
+    onEditSubCategory,
+    onDeleteSubCategory,
+    onEditTag,
+    onDeleteTag,
 }: Props) {
+    /*
+    |--------------------------------------------------------------------------
+    | Select All
+    |--------------------------------------------------------------------------
+    */
+
     const allSelected =
         categories.length > 0 &&
         selectedRows.length === categories.length;
@@ -64,10 +122,18 @@ export function CategoriesTable({
                     (category) => category.id
                 )
             );
-        } else {
-            setSelectedRows([]);
+
+            return;
         }
+
+        setSelectedRows([]);
     };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Select Category
+    |--------------------------------------------------------------------------
+    */
 
     const handleSelect = (
         checked: boolean | "indeterminate",
@@ -75,16 +141,103 @@ export function CategoriesTable({
     ) => {
         if (checked) {
             setSelectedRows((prev) => [
-                ...prev,
-                id,
+                ...new Set([
+                    ...prev,
+                    id,
+                ]),
             ]);
-        } else {
-            setSelectedRows((prev) =>
-                prev.filter(
-                    (item) => item !== id
-                )
+
+            return;
+        }
+
+        setSelectedRows((prev) =>
+            prev.filter(
+                (item) => item !== id
+            )
+        );
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Render Tags
+    |--------------------------------------------------------------------------
+    */
+
+    const renderTags = (
+        subCategory: SubCategory
+    ) => {
+        if (
+            !subCategory.tags ||
+            subCategory.tags.length === 0
+        ) {
+            return (
+                <span className="text-sm text-muted-foreground">
+                    No tags
+                </span>
             );
         }
+
+        return (
+            <div className="flex flex-wrap gap-2">
+                {subCategory.tags.map(
+                    (tag: Tag) => (
+                        <div
+                            key={tag.id}
+                            className="flex items-center gap-1"
+                        >
+                            <Badge
+                                variant="secondary"
+                                className="rounded-full px-3 py-1"
+                            >
+                                {tag.name}
+                            </Badge>
+
+                            <DropdownMenu>
+
+                                <DropdownMenuTrigger
+                                    asChild
+                                >
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6"
+                                    >
+                                        <MoreVertical className="h-3 w-3" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent>
+
+                                    <DropdownMenuItem
+                                        onClick={() =>
+                                            onEditTag(tag)
+                                        }
+                                    >
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Edit
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuSeparator />
+
+                                    <DropdownMenuItem
+                                        className="text-red-600"
+                                        onClick={() =>
+                                            onDeleteTag(tag)
+                                        }
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete
+                                    </DropdownMenuItem>
+
+                                </DropdownMenuContent>
+
+                            </DropdownMenu>
+
+                        </div>
+                    )
+                )}
+            </div>
+        );
     };
 
     return (
@@ -94,27 +247,31 @@ export function CategoriesTable({
 
                 <Table>
 
-                    <TableHeader className="
-                        sticky
-                        top-0
-                        z-10
-                        bg-background
-                    ">
+                    {/* TABLE HEADER */}
+
+                    <TableHeader
+                        className="
+                            sticky
+                            top-0
+                            z-10
+                            bg-background
+                        "
+                    >
 
                         <TableRow>
 
                             <TableHead className="w-12">
 
                                 <Checkbox
-                                    checked={allSelected}
+                                    checked={
+                                        allSelected
+                                    }
                                     onCheckedChange={
                                         handleSelectAll
                                     }
                                 />
 
                             </TableHead>
-
-                            <TableHead className="w-12" />
 
                             <TableHead>
                                 Category
@@ -128,131 +285,403 @@ export function CategoriesTable({
                                 Created
                             </TableHead>
 
+                            <TableHead className="w-12" />
+
                         </TableRow>
 
                     </TableHeader>
 
+                    {/* TABLE BODY */}
+
                     <TableBody>
 
                         {categories.map(
-                            (category) => (
-                                <TableRow
-                                    key={category.id}
-                                >
+                            (category) => {
 
-                                    <TableCell>
+                                const expanded =
+                                    expandedCategories.includes(
+                                        category.id
+                                    );
 
-                                        <Checkbox
-                                            checked={selectedRows.includes(
-                                                category.id
-                                            )}
-                                            onCheckedChange={(
-                                                checked
-                                            ) =>
-                                                handleSelect(
-                                                    checked,
-                                                    category.id
+                                const subCategories =
+                                    category.sub_categories ??
+                                    [];
+
+                                return (
+                                    <React.Fragment
+                                        key={
+                                            category.id
+                                        }
+                                    >
+
+                                        {/* CATEGORY ROW */}
+
+                                        <TableRow>
+
+                                            <TableCell>
+
+                                                <Checkbox
+                                                    checked={selectedRows.includes(
+                                                        category.id
+                                                    )}
+                                                    onCheckedChange={(
+                                                        checked
+                                                    ) =>
+                                                        handleSelect(
+                                                            checked,
+                                                            category.id
+                                                        )
+                                                    }
+                                                />
+
+                                            </TableCell>
+
+                                            <TableCell>
+
+                                                <div className="flex items-center gap-2">
+
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-7 w-7"
+                                                        onClick={() =>
+                                                            onToggleCategory(
+                                                                category.id
+                                                            )
+                                                        }
+                                                    >
+                                                        {expanded ? (
+                                                            <ChevronDown className="h-4 w-4" />
+                                                        ) : (
+                                                            <ChevronRight className="h-4 w-4" />
+                                                        )}
+                                                    </Button>
+
+                                                    <span className="font-semibold">
+                                                        {
+                                                            category.name
+                                                        }
+                                                    </span>
+
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="ml-2"
+                                                    >
+                                                        {
+                                                            subCategories.length
+                                                        }{" "}
+                                                        sub
+                                                    </Badge>
+
+                                                </div>
+
+                                            </TableCell>
+
+                                            <TableCell className="text-muted-foreground">
+
+                                                {
+                                                    category.description ||
+                                                    "—"
+                                                }
+
+                                            </TableCell>
+
+                                            <TableCell>
+
+                                                {new Date(
+                                                    category.created_at
+                                                ).toLocaleDateString()}
+
+                                            </TableCell>
+
+                                            <TableCell>
+
+                                                <DropdownMenu>
+
+                                                    <DropdownMenuTrigger
+                                                        asChild
+                                                    >
+
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                        >
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+
+                                                    </DropdownMenuTrigger>
+
+                                                    <DropdownMenuContent>
+
+                                                        <DropdownMenuItem
+                                                            onClick={() =>
+                                                                onView(
+                                                                    category
+                                                                )
+                                                            }
+                                                        >
+                                                            <Eye className="mr-2 h-4 w-4" />
+                                                            View
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuItem
+                                                            onClick={() =>
+                                                                onEdit(
+                                                                    category
+                                                                )
+                                                            }
+                                                        >
+                                                            <Pencil className="mr-2 h-4 w-4" />
+                                                            Edit
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuSeparator />
+
+                                                        <DropdownMenuItem
+                                                            className="text-red-600"
+                                                            onClick={() =>
+                                                                onDelete(
+                                                                    category
+                                                                )
+                                                            }
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Delete
+                                                        </DropdownMenuItem>
+
+                                                    </DropdownMenuContent>
+
+                                                </DropdownMenu>
+
+                                            </TableCell>
+
+                                        </TableRow>
+
+                                        {/* SUB-CATEGORIES */}
+
+                                        {expanded &&
+                                            subCategories.map(
+                                                (
+                                                    subCategory: SubCategory
+                                                ) => (
+                                                    <TableRow
+                                                        key={`sub-${subCategory.id}`}
+                                                        className="bg-muted/30"
+                                                    >
+
+                                                        {/* Empty checkbox column */}
+
+                                                        <TableCell />
+
+                                                        {/* Sub-category + Tags */}
+
+                                                        <TableCell colSpan={2}>
+
+                                                            <div className="ml-10">
+
+                                                                {/* SUB-CATEGORY HEADER */}
+
+                                                                <div className="flex items-center gap-2">
+
+                                                                    <span className="text-sm font-medium">
+                                                                        {subCategory.name}
+                                                                    </span>
+
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="text-xs"
+                                                                    >
+                                                                        {subCategory.tags?.length ?? 0} tags
+                                                                    </Badge>
+
+                                                                    <DropdownMenu>
+
+                                                                        <DropdownMenuTrigger
+                                                                            asChild
+                                                                        >
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-7 w-7"
+                                                                            >
+                                                                                <MoreVertical className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </DropdownMenuTrigger>
+
+                                                                        <DropdownMenuContent>
+
+                                                                            <DropdownMenuItem
+                                                                                onClick={() =>
+                                                                                    onEditSubCategory(
+                                                                                        subCategory
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                                Edit
+                                                                            </DropdownMenuItem>
+
+                                                                            <DropdownMenuSeparator />
+
+                                                                            <DropdownMenuItem
+                                                                                className="text-red-600"
+                                                                                onClick={() =>
+                                                                                    onDeleteSubCategory(
+                                                                                        subCategory
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                                Delete
+                                                                            </DropdownMenuItem>
+
+                                                                        </DropdownMenuContent>
+
+                                                                    </DropdownMenu>
+
+                                                                </div>
+
+                                                                {/* TAGS */}
+
+                                                                <div className="mt-2 flex flex-wrap items-center gap-2">
+
+                                                                    {renderTags(
+                                                                        subCategory
+                                                                    )}
+
+                                                                </div>
+
+                                                            </div>
+
+                                                        </TableCell>
+
+                                                        {/* ADD TAG */}
+
+                                                        <TableCell>
+
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() =>
+                                                                    onAddTag(
+                                                                        subCategory
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Plus className="mr-2 h-4 w-4" />
+                                                                Add Tag
+                                                            </Button>
+
+                                                        </TableCell>
+
+                                                        {/* SUB-CATEGORY ACTIONS */}
+
+                                                        <TableCell>
+
+                                                            <DropdownMenu>
+
+                                                                <DropdownMenuTrigger
+                                                                    asChild
+                                                                >
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                    >
+                                                                        <MoreVertical className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+
+                                                                <DropdownMenuContent>
+
+                                                                    <DropdownMenuItem
+                                                                        onClick={() =>
+                                                                            onEditSubCategory(
+                                                                                subCategory
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <Pencil className="mr-2 h-4 w-4" />
+                                                                        Edit
+                                                                    </DropdownMenuItem>
+
+                                                                    <DropdownMenuSeparator />
+
+                                                                    <DropdownMenuItem
+                                                                        className="text-red-600"
+                                                                        onClick={() =>
+                                                                            onDeleteSubCategory(
+                                                                                subCategory
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                                        Delete
+                                                                    </DropdownMenuItem>
+
+                                                                </DropdownMenuContent>
+
+                                                            </DropdownMenu>
+
+                                                        </TableCell>
+
+                                                    </TableRow>
                                                 )
-                                            }
-                                        />
+                                            )}
 
-                                    </TableCell>
+                                        {/* ADD SUB-CATEGORY */}
 
-                                    <TableCell>
-
-                                        <DropdownMenu>
-
-                                            <DropdownMenuTrigger
-                                                asChild
+                                        {expanded && (
+                                            <TableRow
+                                                className="bg-muted/20"
                                             >
 
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                >
+                                                <TableCell />
 
-                                                    <MoreVertical className="h-4 w-4" />
-
-                                                </Button>
-
-                                            </DropdownMenuTrigger>
-
-                                            <DropdownMenuContent>
-
-                                                <DropdownMenuItem
-                                                    onClick={() =>
-                                                        onView(
-                                                            category
-                                                        )
+                                                <TableCell
+                                                    colSpan={
+                                                        4
                                                     }
                                                 >
 
-                                                    <Eye className="mr-2 h-4 w-4" />
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="ml-10"
+                                                        onClick={() =>
+                                                            onAddSubCategory(category)
+                                                        }
+                                                    >
+                                                        <Plus className="mr-2 h-4 w-4" />
+                                                        Add Sub-category
+                                                    </Button>
 
-                                                    View
+                                                </TableCell>
 
-                                                </DropdownMenuItem>
+                                            </TableRow>
+                                        )}
 
-                                                <DropdownMenuItem
-                                                    onClick={() =>
-                                                        onEdit(
-                                                            category
-                                                        )
-                                                    }
-                                                >
+                                    </React.Fragment>
+                                );
+                            }
+                        )}
 
-                                                    <Pencil className="mr-2 h-4 w-4" />
+                        {/* EMPTY STATE */}
 
-                                                    Edit
+                        {categories.length === 0 && (
+                            <TableRow>
 
-                                                </DropdownMenuItem>
+                                <TableCell
+                                    colSpan={5}
+                                    className="
+                                        h-32
+                                        text-center
+                                        text-muted-foreground
+                                    "
+                                >
+                                    No categories found.
+                                </TableCell>
 
-                                                <DropdownMenuSeparator />
-
-                                                <DropdownMenuItem
-                                                    className="text-red-600"
-                                                    onClick={() =>
-                                                        onDelete(
-                                                            category
-                                                        )
-                                                    }
-                                                >
-
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-
-                                                    Delete
-
-                                                </DropdownMenuItem>
-
-                                            </DropdownMenuContent>
-
-                                        </DropdownMenu>
-
-                                    </TableCell>
-
-                                    <TableCell className="font-medium">
-
-                                        {category.name}
-
-                                    </TableCell>
-
-                                    <TableCell className="text-muted-foreground">
-
-                                        {category.description ||
-                                            "—"}
-
-                                    </TableCell>
-
-                                    <TableCell>
-
-                                        {new Date(
-                                            category.created_at
-                                        ).toLocaleDateString()}
-
-                                    </TableCell>
-
-                                </TableRow>
-                            )
+                            </TableRow>
                         )}
 
                     </TableBody>
