@@ -4,16 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StockMovement extends Model
+class Stock extends Model
 {
     public $timestamps = false;
 
     protected $fillable = [
         'product_id',
-        'quantity_before',
-        'quantity_after',
-        'quantity_change',
-        'reason',
+        'type',
+        'quantity',
+        'status',
+        'reference_number',
+        'notes',
     ];
 
     protected $casts = [

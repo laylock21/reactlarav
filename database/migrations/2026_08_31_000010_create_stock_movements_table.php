@@ -15,25 +15,18 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('product_id')
+                ->unique()
                 ->constrained()
+                ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('user_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
+            $table->integer('quantity_before');
+            $table->integer('quantity_after');
+            $table->integer('quantity_change');
 
-            $table->string('type');
+            $table->text('reason');
 
-            $table->integer('quantity')->default(0);
-
-            $table->integer('before_quantity')->default(0);
-
-            $table->integer('after_quantity')->default(0);
-
-            $table->text('remarks')->nullable();
-
-            $table->timestamps();
+            $table->timestamp('created_at');
         });
     }
 

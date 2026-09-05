@@ -14,31 +14,36 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
 
-            // Product Information
             $table->string('sku')->unique();
             $table->string('barcode')->nullable();
             $table->string('name');
-            $table->string('category');
-            $table->string('supplier');
-            $table->string('unit')->default('Piece');
 
-            // Inventory
+            $table->foreignId('category_id')
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
+            $table->foreignId('supplier_id')
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->integer('quantity')->default(0);
-            $table->integer('minimum_stock')->default(5);
 
-            // Pricing
-            $table->decimal('cost_price', 10, 2);
+            $table->decimal('cost_price', 10, 2)->nullable();
             $table->decimal('selling_price', 10, 2);
 
-            // Status
-            $table->enum('status', [
-                'Delivered',
-                'Pending',
-                'In Transit',
-                'Out of Stock'
-            ])->default('Pending');
+            $table->text('image_path')->nullable();
 
-            // Notes
+            $table->enum('status', [
+                'no stock',
+                'critical stock',
+                'normal stock',
+                'overstocked',
+            ]);
+
+            $table->boolean('is_active')->default(true);
+
             $table->text('description')->nullable();
 
             $table->timestamps();

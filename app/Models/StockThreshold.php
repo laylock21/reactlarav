@@ -4,16 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StockMovement extends Model
+class StockThreshold extends Model
 {
     public $timestamps = false;
 
     protected $fillable = [
         'product_id',
-        'quantity_before',
-        'quantity_after',
-        'quantity_change',
-        'reason',
+        'min_quantity',
+        'max_quantity',
     ];
 
     protected $casts = [

@@ -4,19 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StockMovement extends Model
+class AnalyticsEvent extends Model
 {
     public $timestamps = false;
 
     protected $fillable = [
         'product_id',
-        'quantity_before',
-        'quantity_after',
-        'quantity_change',
-        'reason',
+        'event_type',
+        'quantity',
+        'amount',
+        'reference_type',
+        'reference_id',
     ];
 
     protected $casts = [
+        'amount' => 'decimal:2',
         'created_at' => 'timestamp',
     ];
 
