@@ -9,10 +9,6 @@ type Props = {
 
     selectedRows: number[];
 
-    setOpen: React.Dispatch<
-        React.SetStateAction<boolean>
-    >;
-
     setDeleteOpen: React.Dispatch<
         React.SetStateAction<boolean>
     >;
@@ -21,19 +17,17 @@ type Props = {
         React.SetStateAction<number | null>
     >;
 
-    setEditingCategory: React.Dispatch<
-        React.SetStateAction<number | null>
-    >;
+    onAddProduct: () => void;
+
 };
 
 export function CategoriesToolbar({
     search,
     setSearch,
     selectedRows,
-    setOpen,
     setDeleteOpen,
     setDeleteTarget,
-    setEditingCategory,
+    onAddProduct,
 }: Props) {
     return (
         <div className="flex items-center justify-between gap-4">
@@ -88,19 +82,14 @@ export function CategoriesToolbar({
 
                 </Button>
 
-                {/* Add Category */}
+                {/* Add Product */}
 
                 <Button
-                    onClick={() => {
-                        setEditingCategory(null);
-                        setOpen(true);
-                    }}
+                    onClick={onAddProduct}
                 >
-
                     <Plus className="mr-2 h-4 w-4" />
 
-                    Add Category
-
+                    Add Product
                 </Button>
 
             </div>

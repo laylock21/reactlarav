@@ -16,6 +16,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { CategoriesToolbar } from "@/components/categories/categories-toolbar";
 import { CategoriesTable } from "@/components/categories/categories-table";
 import { CategoriesPagination } from "@/components/categories/categories-pagination";
+import { ProductDialog } from "@/components/product-dialog";
+import type {
+    ProductForm,
+} from "@/components/products/products-types";
+import products from "@/routes/products";
 
 import type {
     Category,
@@ -140,6 +145,35 @@ export default function Categories({
             emptyCategoryForm
         );
     
+    /*
+    |--------------------------------------------------------------------------
+    | Product Dialog
+    |--------------------------------------------------------------------------
+    */
+
+    const emptyProductForm: ProductForm = {
+        sku: "",
+        barcode: "",
+        name: "",
+        supplier: "",
+        category: "",
+        unit: "",
+        quantity: 0,
+        minimum_stock: 0,
+        cost_price: 0,
+        selling_price: 0,
+        status: "Pending",
+        description: "",
+        archived: false,
+    };
+
+    const [productOpen, setProductOpen] =
+        useState(false);
+
+    const [productForm, setProductForm] =
+        useState<ProductForm>(
+            emptyProductForm
+        );
     /*
     |--------------------------------------------------------------------------
     | Tag Dialog
@@ -349,6 +383,49 @@ export default function Categories({
                         {
                             description:
                                 "There was an error while adding the category.",
+                        }
+                    );
+                },
+            }
+        );
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Save Product
+    |--------------------------------------------------------------------------
+    */
+
+    const saveProduct = () => {
+        router.post(
+            products.store().url,
+            productForm,
+            {
+                preserveScroll: true,
+                preserveState: false,
+
+                onSuccess: () => {
+                    setProductOpen(false);
+
+                    setProductForm(
+                        emptyProductForm
+                    );
+
+                    toast.success(
+                        "Product added successfully.",
+                        {
+                            description:
+                                "The product and its initial stock have been created successfully.",
+                        }
+                    );
+                },
+
+                onError: () => {
+                    toast.error(
+                        "Unable to add product.",
+                        {
+                            description:
+                                "There was an error while creating the product.",
                         }
                     );
                 },
@@ -776,16 +853,19 @@ export default function Categories({
                             selectedRows={
                                 selectedRows
                             }
-                            setOpen={setOpen}
                             setDeleteOpen={
                                 setDeleteOpen
                             }
                             setDeleteTarget={
                                 setDeleteTarget
                             }
-                            setEditingCategory={
-                                setEditingCategory
-                            }
+                            onAddProduct={() => {
+                                setProductForm(
+                                    emptyProductForm
+                                );
+
+                                setProductOpen(true);
+                            }}
                         />
 
                     </CardHeader>
@@ -974,6 +1054,26 @@ export default function Categories({
                 </DialogContent>
 
             </Dialog>
+
+            {/* PRODUCT DIALOG */}
+
+            <ProductDialog
+                open={productOpen}
+                onOpenChange={(value) => {
+                    setProductOpen(value);
+
+                    if (!value) {
+                        setProductForm(
+                            emptyProductForm
+                        );
+                    }
+                }}
+                form={productForm}
+                setForm={setProductForm}
+                onSave={saveProduct}
+                categories={categoriesData}
+                editing={false}
+            />
 
             {/* DELETE DIALOG */}
 

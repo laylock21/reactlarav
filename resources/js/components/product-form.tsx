@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { Category } from "@/components/categories/categories-types";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
     Select,
     SelectContent,
@@ -12,14 +15,122 @@ import {
 type ProductFormProps = {
     form: any;
     setForm: React.Dispatch<React.SetStateAction<any>>;
+    categories: Category[];
 };
 
 export function ProductForm({
     form,
     setForm,
+    categories,
 }: ProductFormProps) {
+    const [imagePreviews, setImagePreviews] = useState<string[]>(
+        []
+    );
+
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
     return (
         <div className="space-y-10 px-2">
+
+            {/* Product Images */}
+
+            <div className="space-y-4">
+
+                <div className="border-b pb-3">
+
+                    <h3 className="text-lg font-semibold">
+                        Product Images
+                    </h3>
+
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Add one or more images to display this product.
+                    </p>
+
+                </div>
+
+                <div className="flex flex-wrap gap-4">
+
+                    {imagePreviews.map((preview, index) => (
+                        <div
+                            key={preview}
+                            className="relative h-32 w-32 overflow-hidden rounded-lg border bg-muted"
+                        >
+                            <img
+                                src={preview}
+                                alt={`Product image ${index + 1}`}
+                                className="h-full w-full object-cover"
+                            />
+
+                            <button
+                                type="button"
+                                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-sm text-white hover:bg-black"
+                                onClick={() => {
+                                    setImagePreviews((prev) =>
+                                        prev.filter(
+                                            (_, imageIndex) =>
+                                                imageIndex !== index
+                                        )
+                                    );
+
+                                    setImageFiles((prev) =>
+                                        prev.filter(
+                                            (_, imageIndex) =>
+                                                imageIndex !== index
+                                        )
+                                    );
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ))}
+
+                    <label className="flex h-32 w-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed text-muted-foreground transition hover:bg-muted/50">
+
+                        <span className="text-2xl">
+                            +
+                        </span>
+
+                        <span className="mt-1 text-sm">
+                            Add Images
+                        </span>
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={(event) => {
+                                const files = Array.from(
+                                    event.target.files ?? []
+                                );
+
+                                if (files.length === 0) {
+                                    return;
+                                }
+
+                                const previews = files.map((file) =>
+                                    URL.createObjectURL(file)
+                                );
+
+                                setImageFiles((prev) => [
+                                    ...prev,
+                                    ...files,
+                                ]);
+
+                                setImagePreviews((prev) => [
+                                    ...prev,
+                                    ...previews,
+                                ]);
+
+                                event.target.value = "";
+                            }}
+                        />
+
+                    </label>
+
+                </div>
+
+            </div>
 
             {/* Product Information */}
             <div className="space-y-4">
@@ -82,16 +193,134 @@ export function ProductForm({
 
                     <div className="space-y-2">
                         <Label>Category</Label>
-                        <Input
-                            value={form.category}
-                            onChange={(e) =>
+
+                        <Select
+                            value={form.category_id?.toString() ?? ""}
+                            onValueChange={(value) =>
                                 setForm({
                                     ...form,
-                                    category: e.target.value,
+                                    category_id: Number(value),
+                                    sub_category_id: null,
+                                    tag_ids: [],
                                 })
                             }
-                            placeholder="Mouse"
-                        />
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Category" />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                {categories.map((category) => (
+                                    <SelectItem
+                                        key={category.id}
+                                        value={category.id.toString()}
+                                    >
+                                        {category.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Sub-category</Label>
+
+                        <Select
+                            value={form.sub_category_id?.toString() ?? ""}
+                            onValueChange={(value) =>
+                                setForm({
+                                    ...form,
+                                    sub_category_id: Number(value),
+                                    tag_ids: [],
+                                })
+                            }
+                            disabled={!form.category_id}
+                        >
+                            <SelectTrigger>
+                                <SelectValue
+                                    placeholder={
+                                        form.category_id
+                                            ? "Select Sub-category"
+                                            : "Select Category First"
+                                    }
+                                />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                {(
+                                    categories.find(
+                                        (category) =>
+                                            category.id === Number(form.category_id)
+                                    )?.sub_categories ?? []
+                                ).map((subCategory) => (
+                                    <SelectItem
+                                        key={subCategory.id}
+                                        value={subCategory.id.toString()}
+                                    >
+                                        {subCategory.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Tags</Label>
+
+                        <div className="rounded-md border p-3">
+                            {!form.sub_category_id ? (
+                                <p className="text-sm text-muted-foreground">
+                                    Select a Sub-category first.
+                                </p>
+                            ) : (
+                                <div className="flex flex-wrap gap-2">
+                                    {(
+                                        categories
+                                            .find(
+                                                (category) =>
+                                                    category.id === Number(form.category_id)
+                                            )
+                                            ?.sub_categories?.find(
+                                                (subCategory) =>
+                                                    subCategory.id ===
+                                                    Number(form.sub_category_id)
+                                            )
+                                            ?.tags ?? []
+                                    ).map((tag) => {
+                                        const selected =
+                                            (form.tag_ids ?? []).includes(tag.id);
+
+                                        return (
+                                            <Badge
+                                                key={tag.id}
+                                                variant={selected ? "default" : "outline"}
+                                                className="cursor-pointer rounded-full px-3 py-1"
+                                                onClick={() => {
+                                                    const currentTags =
+                                                        form.tag_ids ?? [];
+
+                                                    setForm({
+                                                        ...form,
+                                                        tag_ids: selected
+                                                            ? currentTags.filter(
+                                                                (id: number) =>
+                                                                    id !== tag.id
+                                                            )
+                                                            : [
+                                                                ...currentTags,
+                                                                tag.id,
+                                                            ],
+                                                    });
+                                                }}
+                                            >
+                                                {selected ? "× " : "+ "}
+                                                {tag.name}
+                                            </Badge>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="space-y-2">

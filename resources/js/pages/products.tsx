@@ -58,6 +58,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import type { Product } from "@/types/product";
+import type { Category } from "@/components/categories/categories-types";
 
 type Props = {
     products: {
@@ -72,6 +73,8 @@ type Props = {
         next_page_url: string | null;
     };
 
+    categories: Category[];
+
     getStatusColor: (status: string) => string;
 
     archiveProduct: (product: Product) => void;
@@ -79,7 +82,7 @@ type Props = {
     duplicateProduct: (product: Product) => void;
 };
 
-export default function Products({ products: productList }: Props) {
+export default function Products({ products: productList, categories }: Props) {
     const [search, setSearch] = useState("");
     const [statusOpen, setStatusOpen] = useState(false);
     const [statusProduct, setStatusProduct] = useState<Product | null>(null);
@@ -443,6 +446,7 @@ const [form, setForm] = useState<ProductForm>(emptyForm);
                 form={form}
                 setForm={setForm}
                 onSave={saveProduct}
+                categories={categories}
                 editing={editingProduct !== null}
             />
             <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
