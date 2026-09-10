@@ -56,7 +56,7 @@ const mainNavItems: NavItem[] = [
             },
             {
                 title: "Archived",
-                href: "/products/archived",
+                href: "/archived",
             },
         ],
     },

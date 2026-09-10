@@ -23,7 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('products')->name('products.')->group(function () {
         // Main products routes
         Route::get('/', [ProductController::class, 'index'])->name('index');
-        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::get('/create', [ProductController::class, 'create'])->name('create'); //Is this thing used???
         Route::post('/', [ProductController::class, 'store'])->name('store');
         Route::get('/{product}', [ProductController::class, 'show'])->name('show');
         Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
@@ -43,8 +43,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Product movements
         Route::get('/{product}/movements', [ProductController::class, 'movements'])->name('movements');
 
+
+    });
+
+    Route::prefix('archived')->name('archived.')->group(function () {
         // Archived products
-        Route::get('/archived', [ProductController::class, 'archived'])->name('archived');
+        Route::get('/', [ProductController::class, 'archived'])->name('archived');
         Route::patch('/{product}/restore', [ProductController::class, 'restore'])->name('restore');
         Route::patch('/restore-bulk', [ProductController::class, 'restoreBulk'])->name('restore-bulk');
     });
