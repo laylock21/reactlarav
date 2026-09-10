@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CategoriesToolbar } from "@/components/categories/categories-toolbar";
 import { CategoriesTable } from "@/components/categories/categories-table";
 import { CategoriesPagination } from "@/components/categories/categories-pagination";
-import { ProductDialog } from "@/components/product-dialog";
+import { ProductDialog } from "@/components/products/partials/product-dialog";
 import type {
     ProductForm,
 } from "@/components/products/products-types";

@@ -31,7 +31,8 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { dashboard, stockMovement } from "@/routes";
+import { dashboard } from "@/routes";
+import stockMovement from "@/routes/stock-movement";
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
