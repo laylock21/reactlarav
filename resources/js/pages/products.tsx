@@ -17,10 +17,10 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-import { ProductDialog } from "@/components/product-dialog";
+import { ProductDialog } from "@/components/products/partials/product-dialog";
 
 import { useEffect, useMemo, useState } from "react";
-import { ProductViewDialog } from "@/components/product-view-dialog";
+import { ProductViewDialog } from "@/components/products/partials/product-view-dialog";
 import { ProductsToolbar } from "@/components/products/products-toolbar";
 import { ProductsPagination } from "@/components/products/products-pagination";
 import { ProductsTable } from "@/components/products/products-table";

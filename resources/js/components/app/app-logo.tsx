@@ -1,4 +1,4 @@
-import AppLogoIcon from "@/components/app-logo-icon";
+import AppLogoIcon from "@/components/app/app-logo-icon";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 

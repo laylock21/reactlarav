@@ -4,19 +4,17 @@ import {
     LayoutGrid,
     Package,
     Tags,
-    ArrowDownToLine,
-    ArrowUpFromLine,
     Users,
     Truck,
     ChartColumn,
     Settings,
 } from 'lucide-react';
 
-import AppLogo from "@/components/app-logo";
-import AppLogoIcon from "@/components/app-logo-icon";
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
+import AppLogo from "@/components/app/app-logo";
+import AppLogoIcon from "@/components/app/app-logo-icon";
+import { NavFooter } from '@/components/sidebar/nav-footer';
+import { NavMain } from '@/components/sidebar/nav-main';
+import { NavUser } from '@/components/sidebar/nav-user';
 import {
     Sidebar,
     SidebarContent,
@@ -48,8 +46,12 @@ const mainNavItems: NavItem[] = [
         icon: Package,
         children: [
             {
+                title: "Stocks",
+                href: "/stocks",
+            },
+            {
                 title: "Stock Movement",
-                href: stockMovement(),
+                href: "/stock-movement",
             },
             {
                 title: "Archived",
@@ -61,16 +63,6 @@ const mainNavItems: NavItem[] = [
         title: "Categories",
         href: "/categories",
         icon: Tags,
-    },
-    {
-        title: "Stock In",
-        href: "/stock-in",
-        icon: ArrowDownToLine,
-    },
-    {
-        title: "Stock Out",
-        href: "/stock-out",
-        icon: ArrowUpFromLine,
     },
     {
         title: "Users",
@@ -86,6 +78,12 @@ const mainNavItems: NavItem[] = [
         title: "Analytics",
         href: "/analytics",
         icon: ChartColumn,
+        children: [
+            {
+                title: "Analytics Export",
+                href: "/analytics/export",
+            },
+        ],
     },
     {
         title: "Settings",

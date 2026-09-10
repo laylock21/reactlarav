@@ -16,15 +16,13 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $products = Product::query()
-
+            ->where('is_active', true) // Only show active products
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%")
-                    ->orWhere('supplier', 'like', "%{$search}%");
+                    ->orWhere('sku', 'like', "%{$search}%");
                 });
             })
-
             ->paginate(100)
             ->withQueryString();
 
@@ -299,7 +297,7 @@ class ProductController extends Controller
     public function archived(Request $request)
     {
         $products = Product::query()
-            ->where('archived', true)
+            ->where('is_active', false) // Using is_active instead of archived
             ->when(
                 $request->search,
                 function ($query, $search) {
@@ -307,9 +305,7 @@ class ProductController extends Controller
                         $query
                             ->where('name', 'like', "%{$search}%")
                             ->orWhere('sku', 'like', "%{$search}%")
-                            ->orWhere('barcode', 'like', "%{$search}%")
-                            ->orWhere('supplier', 'like', "%{$search}%")
-                            ->orWhere('category', 'like', "%{$search}%");
+                            ->orWhere('barcode', 'like', "%{$search}%");
                     });
                 }
             )
@@ -328,7 +324,7 @@ class ProductController extends Controller
     public function restore(Product $product)
     {
         $product->update([
-            'archived' => false,
+            'is_active' => true, // Using is_active instead of archived
         ]);
 
         return redirect()->back();
@@ -406,7 +402,7 @@ class ProductController extends Controller
         $beforeData = $product->toArray();
 
         $product->update([
-            'archived' => true,
+            'is_active' => false, // Using is_active instead of archived
         ]);
 
         StockMovement::create([
@@ -432,9 +428,9 @@ class ProductController extends Controller
         ]);
 
         Product::whereIn('id', $validated['ids'])
-            ->where('archived', true)
+            ->where('is_active', false) // Using is_active instead of archived
             ->update([
-                'archived' => false,
+                'is_active' => true, // Using is_active instead of archived
             ]);
 
         return back();

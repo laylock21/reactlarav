@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
@@ -14,8 +12,30 @@ class Category extends Model
         'parent_id',
     ];
 
-    public function subCategories(): HasMany
+    // Relationships
+    public function parent()
     {
-        return $this->hasMany(SubCategory::class);
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'category_id');
+    }
+
+    // Scopes
+    public function scopeParentCategories($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    public function scopeSubCategories($query)
+    {
+        return $query->whereNotNull('parent_id');
     }
 }
