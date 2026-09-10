@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { ProductForm } from "./product-form";
+import type { Category } from "@/components/categories/categories-types";
 
 type ProductDialogProps = {
     open: boolean;
@@ -16,16 +17,18 @@ type ProductDialogProps = {
     form: any;
     setForm: React.Dispatch<React.SetStateAction<any>>;
     onSave: () => void;
+    categories: any[];
 
     editing?: boolean;
 };
 
 export function ProductDialog({
     open,
-    onOpenChange,
+    onOpenChange,   
     form,
     setForm,
     onSave,
+    categories,
     editing = false,
 }: ProductDialogProps) {
     return (
@@ -60,6 +63,7 @@ export function ProductDialog({
                         <ProductForm
                             form={form}
                             setForm={setForm}
+                            categories={categories}
                         />
 
                     </div>

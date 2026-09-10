@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -28,6 +29,7 @@ class ProductController extends Controller
 
         return Inertia::render('products', [
             'products' => $products,
+            'categories' => Category::orderBy('name')->get(),
             'filters' => [
                 'search' => $request->search,
             ],
