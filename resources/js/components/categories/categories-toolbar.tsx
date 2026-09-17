@@ -17,7 +17,7 @@ type Props = {
         React.SetStateAction<number | null>
     >;
 
-    onAddProduct: () => void;
+    onAddCategory: () => void;
 
 };
 
@@ -27,7 +27,7 @@ export function CategoriesToolbar({
     selectedRows,
     setDeleteOpen,
     setDeleteTarget,
-    onAddProduct,
+    onAddCategory,
 }: Props) {
     return (
         <div className="flex items-center justify-between gap-4">
@@ -82,14 +82,12 @@ export function CategoriesToolbar({
 
                 </Button>
 
-                {/* Add Product */}
-
                 <Button
-                    onClick={onAddProduct}
+                    onClick={onAddCategory}
                 >
                     <Plus className="mr-2 h-4 w-4" />
 
-                    Add Product
+                    Add Category
                 </Button>
 
             </div>

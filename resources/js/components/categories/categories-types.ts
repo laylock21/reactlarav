@@ -1,21 +1,3 @@
-export type Tag = {
-    id: number;
-    sub_category_id: number;
-    name: string;
-    created_at?: string;
-    updated_at?: string;
-};
-
-export type SubCategory = {
-    id: number;
-    category_id: number;
-    name: string;
-    created_at: string;
-    updated_at: string;
-
-    tags?: Tag[];
-};
-
 export type Category = {
     id: number;
     name: string;
@@ -23,38 +5,25 @@ export type Category = {
     created_at: string;
     updated_at: string;
 
-    sub_categories?: SubCategory[];
+    parent_id: number | null;
+    parent?: Pick<Category, "id" | "name"> | null;
+    // Kept temporarily for the existing product form; category management no
+    // longer creates or edits this legacy relation.
+    sub_categories?: {
+        id: number;
+        name: string;
+        tags?: { id: number; name: string }[];
+    }[];
 };
 
 export type CategoryForm = {
     name: string;
+    parent_id: number | null;
     description: string;
-};
-
-export type SubCategoryForm = {
-    category_id: number | null;
-    name: string;
-    description: string;
-};
-
-
-export type TagForm = {
-    sub_category_id: number | null;
-    name: string;
 };
 
 export const emptyCategoryForm: CategoryForm = {
     name: "",
+    parent_id: null,
     description: "",
 };
-
-export const emptySubCategoryForm: SubCategoryForm = {
-    category_id: null,
-    name: "",
-    description: "",
-};
-
-export const emptyTagForm: TagForm = {
-    sub_category_id: null,
-    name: "",
-};  

@@ -10,15 +10,15 @@ import {
     CardHeader,
 } from "@/components/ui/card";
 
-import { ArchivedToolbar } from "@/components/archived/archived-toolbar";
-import { ArchivedTable } from "@/components/archived/archived-table";
-import { ArchivedPagination } from "@/components/archived/archived-pagination";
-import { ArchivedProductViewDialog } from "@/components/archived/archived-product-view-dialog";
+import { ArchivedToolbar } from "@/components/products/archived/archived-toolbar";
+import { ArchivedTable } from "@/components/products/archived/archived-table";
+import { ArchivedPagination } from "@/components/products/archived/archived-pagination";
+import { ArchivedProductViewDialog } from "@/components/products/archived/archived-product-view-dialog";
 
 import type {
     ArchivedProduct,
     ArchivedProductsResponse,
-} from "@/components/archived/archived-types";
+} from "@/components/products/archived/archived-types";
 
 type Props = {
     products: ArchivedProductsResponse;
@@ -410,7 +410,7 @@ Archived.layout = {
         },
         {
             title: "Archived",
-            href: "/products/archived",
+            href: "/archived",
         },
     ],
 };

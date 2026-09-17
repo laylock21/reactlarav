@@ -1,0 +1,38 @@
+Schema::create('products', function (Blueprint $table) {
+    $table->id();
+
+    $table->string('sku')->unique();
+    $table->string('barcode')->nullable();
+    $table->string('name');
+
+    $table->foreignId('category_id')
+        ->constrained()
+        ->cascadeOnUpdate()
+        ->restrictOnDelete();
+
+    $table->foreignId('supplier_id')
+        ->constrained()
+        ->cascadeOnUpdate()
+        ->restrictOnDelete();
+
+    $table->integer('quantity')->default(0);
+
+    $table->decimal('cost_price', 10, 2)->nullable();
+    $table->decimal('selling_price', 10, 2);
+
+    $table->text('image_path')->nullable();
+
+    // Define ENUM values
+    $table->enum('status', [
+        // ...
+    ]);
+
+    // Schema currently defines this as ENUM
+    $table->enum('is_active', [
+        // ...
+    ]);
+
+    $table->text('description')->nullable();
+
+    $table->timestamps();
+});

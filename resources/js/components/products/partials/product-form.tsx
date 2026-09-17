@@ -200,8 +200,6 @@ export function ProductForm({
                                 setForm({
                                     ...form,
                                     category_id: Number(value),
-                                    sub_category_id: null,
-                                    tag_ids: [],
                                 })
                             }
                         >
@@ -216,48 +214,6 @@ export function ProductForm({
                                         value={category.id.toString()}
                                     >
                                         {category.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Sub-category</Label>
-
-                        <Select
-                            value={form.sub_category_id?.toString() ?? ""}
-                            onValueChange={(value) =>
-                                setForm({
-                                    ...form,
-                                    sub_category_id: Number(value),
-                                    tag_ids: [],
-                                })
-                            }
-                            disabled={!form.category_id}
-                        >
-                            <SelectTrigger>
-                                <SelectValue
-                                    placeholder={
-                                        form.category_id
-                                            ? "Select Sub-category"
-                                            : "Select Category First"
-                                    }
-                                />
-                            </SelectTrigger>
-
-                            <SelectContent>
-                                {(
-                                    categories.find(
-                                        (category) =>
-                                            category.id === Number(form.category_id)
-                                    )?.sub_categories ?? []
-                                ).map((subCategory) => (
-                                    <SelectItem
-                                        key={subCategory.id}
-                                        value={subCategory.id.toString()}
-                                    >
-                                        {subCategory.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

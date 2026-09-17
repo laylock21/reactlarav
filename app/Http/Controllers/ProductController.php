@@ -80,9 +80,9 @@ class ProductController extends Controller
             'product',
             'user',
         ])
+            ->whereKey($validated['ids'])
             ->latest()
-            ->get()
-            ->withQueryString();
+            ->get();
 
         foreach ($movements as $movement) {
             if ($movement->type !== 'EDITED' || ! $movement->before_data) {

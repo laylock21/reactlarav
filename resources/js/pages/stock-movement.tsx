@@ -7,9 +7,9 @@ import {
     CardHeader,
 } from "@/components/ui/card";
 
-import StockMovementStats from "@/components/stock-movement/stock-movement-stats";
-import { StockMovementTable } from "@/components/stock-movement/stock-movement-table";
-import { StockMovementToolbar } from "@/components/stock-movement/stock-movement-toolbar";
+import StockMovementStats from "@/components/products/stock-movement/stock-movement-stats";
+import { StockMovementTable } from "@/components/products/stock-movement/stock-movement-table";
+import { StockMovementToolbar } from "@/components/products/stock-movement/stock-movement-toolbar";
 import { ProductViewDialog } from "@/components/products/partials/product-view-dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +23,8 @@ import {
     DialogFooter,
     DialogTitle,
 } from "@/components/ui/dialog";
-import type { Movement } from "@/components/stock-movement/types";
-import { StockMovementViewDialog } from "@/components/stock-movement/partials/stock-movement-view-dialog";
+import type { Movement } from "@/components/products/stock-movement/types";
+import { StockMovementViewDialog } from "@/components/products/stock-movement/partials/stock-movement-view-dialog";
 
 import {
     DropdownMenu,

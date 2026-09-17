@@ -3,8 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\SubCategoryController;
-use App\Http\Controllers\TagController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\AnalyticsController;
 
@@ -75,23 +73,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
         Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
 
-        // Sub-categories
-        Route::post('/{category}/sub-categories', [SubCategoryController::class, 'store'])->name('sub-categories.store');
-    });
-
-    // Sub-categories (separate resource)
-    Route::prefix('sub-categories')->name('sub-categories.')->group(function () {
-        Route::put('/{subCategory}', [SubCategoryController::class, 'update'])->name('update');
-        Route::delete('/{subCategory}', [SubCategoryController::class, 'destroy'])->name('destroy');
-
-        // Tags under sub-categories
-        Route::post('/{subCategory}/tags', [TagController::class, 'store'])->name('tags.store');
-    });
-
-    // Tags
-    Route::prefix('tags')->name('tags.')->group(function () {
-        Route::put('/{tag}', [TagController::class, 'update'])->name('update');
-        Route::delete('/{tag}', [TagController::class, 'destroy'])->name('destroy');
     });
 
     // ===========================================

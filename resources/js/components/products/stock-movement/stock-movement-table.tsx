@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Product } from "@/types/product";
 
-import type { Movement } from "@/components/stock-movement/types";
+import type { Movement } from "@/components/products/stock-movement/types";
 
 type StockMovementTableProps = {
     movements: Movement[];
