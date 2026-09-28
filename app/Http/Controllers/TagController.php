@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SubCategory;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 
@@ -14,18 +13,18 @@ class TagController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function store(Request $request, SubCategory $subCategory)
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                'unique:tags,name,NULL,id,sub_category_id,' . $subCategory->id,
+                'unique:tags,name',
             ],
         ]);
 
-        $subCategory->tags()->create($validated);
+        Tag::create($validated);
 
         return back();
     }
@@ -45,10 +44,7 @@ class TagController extends Controller
                 'required',
                 'string',
                 'max:255',
-                'unique:tags,name,' .
-                    $tag->id .
-                    ',id,sub_category_id,' .
-                    $tag->sub_category_id,
+                'unique:tags,name,' . $tag->id,
             ],
         ]);
 

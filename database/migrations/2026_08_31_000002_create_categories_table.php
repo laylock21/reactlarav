@@ -20,7 +20,8 @@ return new class extends Migration
             $table->foreignId('parent_id')
                 ->nullable()
                 ->constrained('categories')
-                ->nullOnDelete();
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
 
             $table->timestamps();
         });

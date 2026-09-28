@@ -1,4 +1,4 @@
-import { Plus, Search, Trash2 } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,26 +7,12 @@ type Props = {
     search: string;
     setSearch: React.Dispatch<React.SetStateAction<string>>;
 
-    selectedRows: number[];
-
-    setDeleteOpen: React.Dispatch<
-        React.SetStateAction<boolean>
-    >;
-
-    setDeleteTarget: React.Dispatch<
-        React.SetStateAction<number | null>
-    >;
-
     onAddCategory: () => void;
-
 };
 
 export function CategoriesToolbar({
     search,
     setSearch,
-    selectedRows,
-    setDeleteOpen,
-    setDeleteTarget,
     onAddCategory,
 }: Props) {
     return (
@@ -60,27 +46,6 @@ export function CategoriesToolbar({
             {/* Actions */}
 
             <div className="flex items-center gap-2">
-
-                {/* Delete */}
-
-                <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={
-                        selectedRows.length === 0
-                    }
-                    onClick={() => {
-                        setDeleteTarget(null);
-                        setDeleteOpen(true);
-                    }}
-                    className="transition-colors"
-                >
-
-                    <Trash2 className="mr-2 h-4 w-4" />
-
-                    Delete
-
-                </Button>
 
                 <Button
                     onClick={onAddCategory}

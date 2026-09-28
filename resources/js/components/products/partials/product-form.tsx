@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Category } from "@/components/categories/categories-types";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import {
     Select,
     SelectContent,
@@ -218,65 +217,6 @@ export function ProductForm({
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Tags</Label>
-
-                        <div className="rounded-md border p-3">
-                            {!form.sub_category_id ? (
-                                <p className="text-sm text-muted-foreground">
-                                    Select a Sub-category first.
-                                </p>
-                            ) : (
-                                <div className="flex flex-wrap gap-2">
-                                    {(
-                                        categories
-                                            .find(
-                                                (category) =>
-                                                    category.id === Number(form.category_id)
-                                            )
-                                            ?.sub_categories?.find(
-                                                (subCategory) =>
-                                                    subCategory.id ===
-                                                    Number(form.sub_category_id)
-                                            )
-                                            ?.tags ?? []
-                                    ).map((tag) => {
-                                        const selected =
-                                            (form.tag_ids ?? []).includes(tag.id);
-
-                                        return (
-                                            <Badge
-                                                key={tag.id}
-                                                variant={selected ? "default" : "outline"}
-                                                className="cursor-pointer rounded-full px-3 py-1"
-                                                onClick={() => {
-                                                    const currentTags =
-                                                        form.tag_ids ?? [];
-
-                                                    setForm({
-                                                        ...form,
-                                                        tag_ids: selected
-                                                            ? currentTags.filter(
-                                                                (id: number) =>
-                                                                    id !== tag.id
-                                                            )
-                                                            : [
-                                                                ...currentTags,
-                                                                tag.id,
-                                                            ],
-                                                    });
-                                                }}
-                                            >
-                                                {selected ? "× " : "+ "}
-                                                {tag.name}
-                                            </Badge>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
                     </div>
 
                     <div className="space-y-2">

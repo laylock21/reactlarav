@@ -7,13 +7,10 @@ export type Category = {
 
     parent_id: number | null;
     parent?: Pick<Category, "id" | "name"> | null;
-    // Kept temporarily for the existing product form; category management no
-    // longer creates or edits this legacy relation.
-    sub_categories?: {
-        id: number;
-        name: string;
-        tags?: { id: number; name: string }[];
-    }[];
+
+    children?: Category[];
+    children_count?: number;
+    products_count?: number;
 };
 
 export type CategoryForm = {

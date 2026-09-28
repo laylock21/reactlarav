@@ -3,27 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     public function index(Request $request)
     {
         $categories = Category::query()
-            ->with('parent:id,name')
+            ->parentCategories()
+            ->with([
+                'children' => fn ($query) => $query
+                    ->withCount('products')
+                    ->orderBy('name'),
+            ])
+            ->withCount(['children', 'products'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim();
 
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%")
-                        ->orWhereHas('parent', fn ($parent) => $parent->where('name', 'like', "%{$search}%"));
+                        ->orWhereHas('children', fn ($child) => $child->where('name', 'like', "%{$search}%"));
                 });
             })
-            ->orderByRaw('parent_id is not null')
-            ->orderBy('parent_id')
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
@@ -57,13 +63,36 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        if ($category->products()->exists()) {
+        $childrenCount = $category->children()->count();
+
+        if ($childrenCount > 0) {
             return back()->withErrors([
-                'category' => 'Categories assigned to products cannot be deleted.',
+                'category' => "Cannot delete \"{$category->name}\" because it has {$childrenCount} ".
+                    Str::plural('subcategory', $childrenCount).
+                    '. Move or delete the subcategories first.',
             ]);
         }
 
-        $category->delete();
+        $productsCount = $category->products()->count();
+
+        if ($productsCount > 0) {
+            return back()->withErrors([
+                'category' => "Cannot delete \"{$category->name}\" because {$productsCount} ".
+                    Str::plural('product', $productsCount).
+                    ($productsCount === 1 ? ' is' : ' are').
+                    ' assigned to it. Reassign the products before deleting the category.',
+            ]);
+        }
+
+        try {
+            $category->delete();
+        } catch (QueryException $e) {
+            // Database-level RESTRICT safety net: covers the race between
+            // the checks above and the delete.
+            return back()->withErrors([
+                'category' => "Cannot delete \"{$category->name}\" because it is still referenced by other records.",
+            ]);
+        }
 
         return back();
     }
