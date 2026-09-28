@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\AnalyticsController;
 
@@ -88,9 +89,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Suppliers
     // ===========================================
     Route::prefix('suppliers')->name('suppliers.')->group(function () {
-        Route::get('/', function () {
-            return inertia('suppliers/index');
-        })->name('index');
+        Route::get('/', [SupplierController::class, 'index'])->name('index');
+        Route::post('/', [SupplierController::class, 'store'])->name('store');
+        Route::put('/{supplier}', [SupplierController::class, 'update'])->name('update');
+        Route::delete('/{supplier}', [SupplierController::class, 'destroy'])->name('destroy');
     });
 
     // ===========================================
