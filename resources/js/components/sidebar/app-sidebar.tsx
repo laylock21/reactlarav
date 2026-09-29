@@ -66,11 +66,6 @@ const mainNavItems: NavItem[] = [
         icon: Tags,
     },
     {
-        title: "Users",
-        href: "/users",
-        icon: Users,
-    },
-    {
         title: "Suppliers",
         href: "/suppliers",
         icon: Truck,
@@ -85,6 +80,11 @@ const mainNavItems: NavItem[] = [
                 href: "/analytics/export",
             },
         ],
+    },
+        {
+        title: "Users",
+        href: "/users",
+        icon: Users,
     },
     {
         title: "Settings",

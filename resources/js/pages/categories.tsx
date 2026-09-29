@@ -39,6 +39,7 @@ export default function Categories({ categories: categoryList, filters }: Props)
     }, [categories, search]);
 
     const openCreate = () => { setEditingCategory(null); setForm(emptyCategoryForm); setFormOpen(true); };
+    const openCreateSubcategory = (parent: Category) => { setEditingCategory(null); setForm({ ...emptyCategoryForm, parent_id: parent.id }); setFormOpen(true); };
     const openEdit = (category: Category) => { setEditingCategory(category); setForm({ name: category.name, parent_id: category.parent_id, description: category.description ?? "" }); setFormOpen(true); };
     const saveCategory = () => {
         const options = { preserveScroll: true, onSuccess: () => { setFormOpen(false); setForm(emptyCategoryForm); toast.success(editingCategory ? "Category updated successfully." : "Category added successfully."); }, onError: () => toast.error("Unable to save category. Check the name and selected parent.") };
@@ -84,6 +85,7 @@ export default function Categories({ categories: categoryList, filters }: Props)
                             onToggle={toggleCategory}
                             onEdit={openEdit}
                             onDelete={requestDelete}
+                            onAddSubcategory={openCreateSubcategory}
                         />
                     </CardContent>
                 </Card>

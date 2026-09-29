@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { persistAppearance } from '@/lib/persist-appearance';
 
 export type ResolvedAppearance = 'light' | 'dark';
 export type Appearance = ResolvedAppearance | 'system';
@@ -106,6 +107,9 @@ export function useAppearance(): UseAppearanceReturn {
 
         // Store in cookie for SSR...
         setCookie('appearance', mode);
+
+        // Persist to user_settings so the preference follows the account.
+        persistAppearance(mode, localStorage.getItem('font-size') || 'medium');
 
         applyTheme(mode);
         notify();

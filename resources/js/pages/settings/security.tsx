@@ -1,15 +1,13 @@
-import { Form, Head } from '@inertiajs/react';
-import { useRef } from 'react';
-import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
+import { Head } from '@inertiajs/react';
+import { useState } from 'react';
+import ChangePasswordDialog from '@/components/settings/change-password-dialog';
+import DeleteUser from '@/components/settings/delete-user';
 import Heading from '@/components/archive/heading';
-import InputError from '@/components/index/input-error';
 import type { Props as ManagePasskeysProps } from '@/components/settings/manage-passkeys';
 import ManagePasskeys from '@/components/settings/manage-passkeys';
 import type { Props as ManageTwoFactorProps } from '@/components/settings/manage-two-factor';
 import ManageTwoFactor from '@/components/settings/manage-two-factor';
-import PasswordInput from '@/components/index/password-input';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/security';
 
 type Props = {
@@ -18,8 +16,7 @@ type Props = {
     ManageTwoFactorProps;
 
 export default function Security(props: Props) {
-    const passwordInput = useRef<HTMLInputElement>(null);
-    const currentPasswordInput = useRef<HTMLInputElement>(null);
+    const [passwordOpen, setPasswordOpen] = useState(false);
 
     return (
         <>
@@ -30,98 +27,22 @@ export default function Security(props: Props) {
             <div className="space-y-6">
                 <Heading
                     variant="small"
-                    title="Update password"
-                    description="Ensure your account is using a long, random password to stay secure"
+                    title="Change password"
+                    description="Update the password used to sign in to your account"
                 />
 
-                <Form
-                    {...SecurityController.update.form()}
-                    options={{
-                        preserveScroll: true,
-                    }}
-                    resetOnError={[
-                        'password',
-                        'password_confirmation',
-                        'current_password',
-                    ]}
-                    resetOnSuccess
-                    onError={(errors: any) => {
-                        if (errors.password) {
-                            passwordInput.current?.focus();
-                        }
-
-                        if (errors.current_password) {
-                            currentPasswordInput.current?.focus();
-                        }
-                    }}
-                    className="space-y-6"
-                >
-                    {({ errors, processing }: any) => (
-                        <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="current_password">
-                                    Current password
-                                </Label>
-
-                                <PasswordInput
-                                    id="current_password"
-                                    ref={currentPasswordInput}
-                                    name="current_password"
-                                    className="mt-1 block w-full"
-                                    autoComplete="current-password"
-                                    placeholder="Current password"
-                                />
-
-                                <InputError message={errors.current_password} />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="password">New password</Label>
-
-                                <PasswordInput
-                                    id="password"
-                                    ref={passwordInput}
-                                    name="password"
-                                    className="mt-1 block w-full"
-                                    autoComplete="new-password"
-                                    placeholder="New password"
-                                    passwordrules={props.passwordRules}
-                                />
-
-                                <InputError message={errors.password} />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
-                                    Confirm password
-                                </Label>
-
-                                <PasswordInput
-                                    id="password_confirmation"
-                                    name="password_confirmation"
-                                    className="mt-1 block w-full"
-                                    autoComplete="new-password"
-                                    placeholder="Confirm password"
-                                    passwordrules={props.passwordRules}
-                                />
-
-                                <InputError
-                                    message={errors.password_confirmation}
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                                <Button
-                                    disabled={processing}
-                                    data-test="update-password-button"
-                                >
-                                    Save
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </Form>
+                <div>
+                    <Button onClick={() => setPasswordOpen(true)}>
+                        Change password
+                    </Button>
+                </div>
             </div>
+
+            <ChangePasswordDialog
+                open={passwordOpen}
+                onOpenChange={setPasswordOpen}
+                passwordRules={props.passwordRules}
+            />
 
             <ManageTwoFactor
                 canManageTwoFactor={props.canManageTwoFactor}
@@ -133,6 +54,8 @@ export default function Security(props: Props) {
                 canManagePasskeys={props.canManagePasskeys}
                 passkeys={props.passkeys}
             />
+
+            <DeleteUser />
         </>
     );
 }

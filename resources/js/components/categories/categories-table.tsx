@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { ChevronDown, ChevronRight, CornerDownRight, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, CornerDownRight, MoreVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -12,6 +12,7 @@ type Props = {
     onToggle: (category: Category) => void;
     onEdit: (category: Category) => void;
     onDelete: (category: Category) => void;
+    onAddSubcategory: (parent: Category) => void;
 };
 
 function ActionsCell({ category, onEdit, onDelete }: { category: Category; onEdit: (category: Category) => void; onDelete: (category: Category) => void }) {
@@ -35,7 +36,7 @@ function ActionsCell({ category, onEdit, onDelete }: { category: Category; onEdi
     );
 }
 
-export function CategoriesTable({ categories, expandedId, onToggle, onEdit, onDelete }: Props) {
+export function CategoriesTable({ categories, expandedId, onToggle, onEdit, onDelete, onAddSubcategory }: Props) {
     const visibleCategories = expandedId ? categories.filter((category) => category.id === expandedId) : categories;
 
     return (
@@ -81,6 +82,26 @@ export function CategoriesTable({ categories, expandedId, onToggle, onEdit, onDe
                                             <ActionsCell category={category} onEdit={onEdit} onDelete={onDelete} />
                                         </TableCell>
                                     </TableRow>
+                                    {isExpanded && (
+                                        <TableRow
+                                            className="cursor-pointer border-dashed bg-muted/30 hover:bg-muted/50"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                onAddSubcategory(category);
+                                            }}
+                                        >
+                                            <TableCell />
+                                            <TableCell>
+                                                <span className="flex items-center gap-2 pl-2 font-medium text-muted-foreground">
+                                                    <Plus className="h-4 w-4" />
+                                                    Add subcategory under {category.name}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell />
+                                            <TableCell />
+                                            <TableCell />
+                                        </TableRow>
+                                    )}
                                     {isExpanded &&
                                         subcategories.map((subcategory) => (
                                             <TableRow key={subcategory.id} className="bg-muted/50 hover:bg-muted/70">

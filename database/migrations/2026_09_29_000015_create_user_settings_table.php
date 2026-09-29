@@ -25,7 +25,17 @@ return new class extends Migration
             $table->enum('theme', [
                 'dark',
                 'light',
+                'system',
             ]);
+
+            $table->enum('font_size', [
+                'small',
+                'medium',
+                'large',
+            ])->default('medium');
+
+            $table->boolean('email_mfa_enabled')->default(false);
+            $table->boolean('phone_mfa_enabled')->default(false);
         });
     }
 
