@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'admin',
             'is_active' => true,
+            'email_verified_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -33,6 +34,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'manager',
             'is_active' => true,
+            'email_verified_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -43,6 +45,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'staff',
             'is_active' => true,
+            'email_verified_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -598,7 +601,7 @@ class DatabaseSeeder extends Seeder
                 'type' => 'alert',
                 'title' => 'Low Stock',
                 'message' => 'Mechanical Keyboard is below its minimum stock threshold.',
-                'action_url' => '/products/' . $keyboardId,
+                'action_url' => '/products/'.$keyboardId,
                 'is_read' => false,
                 'read_at' => null,
                 'created_at' => now(),
@@ -607,7 +610,7 @@ class DatabaseSeeder extends Seeder
                 'type' => 'warning',
                 'title' => 'Out of Stock',
                 'message' => 'Wireless Mouse is currently out of stock.',
-                'action_url' => '/products/' . $mouseId,
+                'action_url' => '/products/'.$mouseId,
                 'is_read' => false,
                 'read_at' => null,
                 'created_at' => now(),
@@ -616,7 +619,7 @@ class DatabaseSeeder extends Seeder
                 'type' => 'alert',
                 'title' => 'Order Update',
                 'message' => 'Order ORD-0002 is packed and ready for delivery.',
-                'action_url' => '/orders/' . $order2Id,
+                'action_url' => '/orders/'.$order2Id,
                 'is_read' => true,
                 'read_at' => now(),
                 'created_at' => Carbon::now()->subHour(),

@@ -2,13 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Passkeys\Contracts\PasskeyUser;
 use Laravel\Passkeys\PasskeyAuthenticatable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements PasskeyUser
 {
+    /** @use HasFactory<UserFactory> */
+    use HasFactory;
+
+    use Notifiable;
     use PasskeyAuthenticatable;
     use TwoFactorAuthenticatable;
 
@@ -37,6 +46,10 @@ class User extends Authenticatable
         'phone_number',
         'address',
         'avatar_path',
+        'current_session_id',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
     ];
 
     protected $hidden = [
@@ -55,25 +68,26 @@ class User extends Authenticatable
      * Public URL for the profile photo, consumed by the sidebar avatar
      * and the profile page. Null when no photo was uploaded.
      */
-    protected function avatar(): Attribute
+    public function getAvatarAttribute(): ?string
     {
-        return Attribute::get(
-            fn () => $this->avatar_path ? asset('storage/'.$this->avatar_path) : null
-        );
+        return $this->avatar_path ? asset('storage/'.$this->avatar_path) : null;
     }
 
     // Relationships
-    public function orders()
+    /** @return HasMany<Order, $this> */
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'user_id');
     }
 
-    public function settings()
+    /** @return HasOne<UserSetting, $this> */
+    public function settings(): HasOne
     {
         return $this->hasOne(UserSetting::class, 'user_id');
     }
 
-    public function actionLogs()
+    /** @return HasMany<ActionLog, $this> */
+    public function actionLogs(): HasMany
     {
         return $this->hasMany(ActionLog::class, 'user_id');
     }

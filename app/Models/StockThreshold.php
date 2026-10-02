@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockThreshold extends Model
 {
@@ -19,7 +20,8 @@ class StockThreshold extends Model
     ];
 
     // Relationships
-    public function product()
+    /** @return BelongsTo<Product, $this> */
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }

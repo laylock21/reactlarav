@@ -30,7 +30,11 @@ test('security page is displayed', function () {
         );
 });
 
-test('security page requires password confirmation when enabled', function () {
+test('security page opens directly without password confirmation', function () {
+    // Owner decision: the RequirePassword gate was removed from
+    // security.edit because it bounced users to confirm-password.
+    // Sensitive operations inside (2FA, passkeys) keep their own
+    // confirmation flows.
     $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
 
     $user = User::factory()->create();
@@ -43,7 +47,7 @@ test('security page requires password confirmation when enabled', function () {
     $response = $this->actingAs($user)
         ->get(route('security.edit'));
 
-    $response->assertRedirect(route('password.confirm'));
+    $response->assertOk();
 });
 
 test('security page renders without two factor when feature is disabled', function () {

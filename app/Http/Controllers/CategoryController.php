@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\ResolvesPerPage;
 use App\Models\Category;
-use Illuminate\Database\QueryException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request)
+    use ResolvesPerPage;
+
+    public function index(Request $request): Response
     {
         $categories = Category::query()
             ->parentCategories()
@@ -31,7 +35,7 @@ class CategoryController extends Controller
                 });
             })
             ->orderBy('name')
-            ->paginate(10)
+            ->paginate($this->perPage(10))
             ->withQueryString();
 
         return Inertia::render('categories', [
@@ -43,7 +47,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $this->validatedCategory($request);
 
@@ -52,7 +56,7 @@ class CategoryController extends Controller
         return back();
     }
 
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Category $category): RedirectResponse
     {
         $validated = $this->validatedCategory($request, $category);
 
@@ -61,7 +65,7 @@ class CategoryController extends Controller
         return back();
     }
 
-    public function destroy(Category $category)
+    public function destroy(Category $category): RedirectResponse
     {
         $childrenCount = $category->children()->count();
 
@@ -84,19 +88,23 @@ class CategoryController extends Controller
             ]);
         }
 
-        try {
-            $category->delete();
-        } catch (QueryException $e) {
-            // Database-level RESTRICT safety net: covers the race between
-            // the checks above and the delete.
-            return back()->withErrors([
-                'category' => "Cannot delete \"{$category->name}\" because it is still referenced by other records.",
-            ]);
-        }
+        // Database-level RESTRICT safety net: covers the race between
+        // the checks above and the delete.
+        return rescue(
+            function () use ($category) {
+                $category->delete();
 
-        return back();
+                return back();
+            },
+            function () use ($category) {
+                return back()->withErrors([
+                    'category' => "Cannot delete \"{$category->name}\" because it is still referenced by other records.",
+                ]);
+            }
+        );
     }
 
+    /** @return array<string, mixed> */
     private function validatedCategory(Request $request, ?Category $category = null): array
     {
         return $request->validate([
@@ -107,7 +115,9 @@ class CategoryController extends Controller
                 'exists:categories,id',
                 Rule::notIn([$category?->id]),
                 function ($attribute, $value, $fail) {
-                    if (Category::find($value)?->parent_id !== null) {
+                    $parent = Category::find($value);
+
+                    if ($parent instanceof Category && $parent->parent_id !== null) {
                         $fail('The parent category must be a top-level category.');
                     }
                 },

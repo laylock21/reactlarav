@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Http\Responses\LoginResponse;
+use App\Http\Responses\PasskeyLoginResponse;
+use App\Http\Responses\TwoFactorLoginResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -32,6 +35,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        $this->configureLoginResponses();
     }
 
     /**
@@ -96,5 +100,28 @@ class FortifyServiceProvider extends ServiceProvider
                 ($request->input('credential.id') ?: $request->session()->getId()).'|'.$request->ip(),
             );
         });
+    }
+
+    /**
+     * Bind session-tracking login responses. Each login flow regenerates
+     * the session before resolving its response, so the stored id is the
+     * final one — covering password, 2FA, and passkey logins uniformly.
+     */
+    private function configureLoginResponses(): void
+    {
+        $this->app->singleton(
+            \Laravel\Fortify\Contracts\LoginResponse::class,
+            LoginResponse::class
+        );
+
+        $this->app->singleton(
+            \Laravel\Fortify\Contracts\TwoFactorLoginResponse::class,
+            TwoFactorLoginResponse::class
+        );
+
+        $this->app->singleton(
+            \Laravel\Passkeys\Contracts\PasskeyLoginResponse::class,
+            PasskeyLoginResponse::class
+        );
     }
 }

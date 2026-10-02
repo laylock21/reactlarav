@@ -1,10 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ActionLogController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\AnalyticsController;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -57,6 +63,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [StockController::class, 'index'])->name('index');
         Route::post('/', [StockController::class, 'store'])->name('store');
         Route::get('/{stock}', [StockController::class, 'show'])->name('show');
+        Route::put('/{stock}', [StockController::class, 'update'])->name('update');
+        Route::delete('/{stock}', [StockController::class, 'destroy'])->name('destroy');
     });
 
     // Stock Movement (child of Products)
@@ -80,9 +88,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Users
     // ===========================================
     Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', function () {
-            return inertia('users/index');
-        })->name('index');
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::put('/{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
     });
 
     // ===========================================
@@ -96,11 +105,61 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ===========================================
+    // Customers (shell: list only)
+    // ===========================================
+    Route::prefix('customers')->name('customers.')->group(function () {
+        Route::get('/', [CustomerController::class, 'index'])->name('index');
+        Route::post('/', [CustomerController::class, 'store'])->name('store');
+        Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
+        Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
+    });
+
+    // ===========================================
+    // Orders (shell: list only)
+    // ===========================================
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::post('/', [OrderController::class, 'store'])->name('store');
+        Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+        Route::put('/{order}', [OrderController::class, 'update'])->name('update');
+        Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
+    });
+
+    // ===========================================
+    // Notifications (inbox for observer alerts)
+    // ===========================================
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::patch('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+        Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+    });
+
+    // ===========================================
+    // Action Logs (read-only audit trail)
+    // ===========================================
+    Route::prefix('action-logs')->name('action-logs.')->group(function () {
+        Route::get('/', [ActionLogController::class, 'index'])->name('index');
+    });
+
+    // ===========================================
+    // Tags
+    // ===========================================
+    Route::prefix('tags')->name('tags.')->group(function () {
+        Route::get('/', [TagController::class, 'index'])->name('index');
+        Route::post('/', [TagController::class, 'store'])->name('store');
+        Route::put('/{tag}', [TagController::class, 'update'])->name('update');
+        Route::delete('/{tag}', [TagController::class, 'destroy'])->name('destroy');
+    });
+
+    // ===========================================
     // Analytics (with child: Analytics Export)
     // ===========================================
     Route::prefix('analytics')->name('analytics.')->group(function () {
         Route::get('/', [AnalyticsController::class, 'index'])->name('index');
+        Route::get('/graphs', [AnalyticsController::class, 'graphs'])->name('graphs');
         Route::get('/export', [AnalyticsController::class, 'export'])->name('export');
+        Route::post('/snapshots', [AnalyticsController::class, 'runSnapshots'])->name('snapshots');
     });
 
 });

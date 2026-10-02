@@ -17,12 +17,20 @@ class AppearanceController extends Controller
      */
     public function edit(Request $request): Response
     {
-        $settings = $request->user()->settings;
+        // firstOrNew with defaults keeps every value non-nullable for
+        // callers while never persisting a row: a missing settings row
+        // simply reads as defaults.
+        $settings = $request->user()->settings()->firstOrNew([
+            'theme' => 'system',
+            'font_size' => 'medium',
+            'items_per_page' => 20,
+        ]);
 
         return Inertia::render('settings/appearance', [
             'settings' => [
-                'theme' => $settings?->theme ?? 'system',
-                'font_size' => $settings?->font_size ?? 'medium',
+                'theme' => $settings->theme,
+                'font_size' => $settings->font_size,
+                'items_per_page' => $settings->items_per_page,
             ],
         ]);
     }
@@ -34,8 +42,9 @@ class AppearanceController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'theme' => ['required', Rule::in(['light', 'dark', 'system'])],
-            'font_size' => ['required', Rule::in(['small', 'medium', 'large'])],
+            'theme' => ['sometimes', 'required', Rule::in(['light', 'dark', 'system'])],
+            'font_size' => ['sometimes', 'required', Rule::in(['small', 'medium', 'large'])],
+            'items_per_page' => ['sometimes', 'required', 'integer', 'min:5', 'max:100'],
         ]);
 
         $request->user()->settings()->updateOrCreate([], $validated);

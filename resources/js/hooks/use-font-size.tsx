@@ -6,6 +6,8 @@ export type FontSize = 'small' | 'medium' | 'large';
 export type UseFontSizeReturn = {
     readonly fontSize: FontSize;
     readonly updateFontSize: (size: FontSize) => void;
+    /** Adopt a size locally (DB hydration) without persisting. */
+    readonly syncFontSize: (size: FontSize) => void;
 };
 
 // Shell/preview only: root font size in px. Tailwind v4 sizes everything
@@ -78,5 +80,12 @@ export function useFontSize(): UseFontSizeReturn {
         notify();
     };
 
-    return { fontSize, updateFontSize } as const;
+    const syncFontSize = (size: FontSize): void => {
+        currentFontSize = size;
+        localStorage.setItem('font-size', size);
+        applyFontSize(size);
+        notify();
+    };
+
+    return { fontSize, updateFontSize, syncFontSize } as const;
 }

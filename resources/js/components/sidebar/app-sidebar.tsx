@@ -4,8 +4,13 @@ import {
     LayoutGrid,
     Package,
     Tags,
+    Tag,
     Users,
     Truck,
+    Contact,
+    ShoppingCart,
+    Bell,
+    ScrollText,
     ChartColumn,
     Settings,
 } from 'lucide-react';
@@ -47,7 +52,7 @@ const mainNavItems: NavItem[] = [
         icon: Package,
         children: [
             {
-                title: "Stocks",
+                title: "Stock Management",
                 href: "/stocks",
             },
             {
@@ -66,9 +71,34 @@ const mainNavItems: NavItem[] = [
         icon: Tags,
     },
     {
+        title: "Tags",
+        href: "/tags",
+        icon: Tag,
+    },
+    {
         title: "Suppliers",
         href: "/suppliers",
         icon: Truck,
+    },
+    {
+        title: "Orders",
+        href: "/orders",
+        icon: ShoppingCart,
+    },
+    {
+        title: "Notifications",
+        href: "/notifications",
+        icon: Bell,
+    },
+    {
+        title: "Action Logs",
+        href: "/action-logs",
+        icon: ScrollText,
+    },
+    {
+        title: "Customers",
+        href: "/customers",
+        icon: Contact,
     },
     {
         title: "Analytics",
@@ -76,8 +106,8 @@ const mainNavItems: NavItem[] = [
         icon: ChartColumn,
         children: [
             {
-                title: "Analytics Export",
-                href: "/analytics/export",
+                title: "Graphs",
+                href: "/analytics/graphs",
             },
         ],
     },

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AnalyticsSnapshot extends Model
 {
@@ -17,6 +18,7 @@ class AnalyticsSnapshot extends Model
         'total_removed',
         'total_revenue',
         'total_returns',
+        'created_at',
     ];
 
     protected $casts = [
@@ -26,7 +28,8 @@ class AnalyticsSnapshot extends Model
     ];
 
     // Relationships
-    public function product()
+    /** @return BelongsTo<Product, $this> */
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }

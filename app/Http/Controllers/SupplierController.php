@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\ResolvesPerPage;
 use App\Models\Supplier;
-use Illuminate\Database\QueryException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class SupplierController extends Controller
 {
-    public function index(Request $request)
+    use ResolvesPerPage;
+
+    public function index(Request $request): Response
     {
         $suppliers = Supplier::query()
             ->withCount('products')
@@ -27,7 +31,7 @@ class SupplierController extends Controller
                 });
             })
             ->orderBy('name')
-            ->paginate(10)
+            ->paginate($this->perPage(10))
             ->withQueryString();
 
         return Inertia::render('suppliers', [
@@ -39,7 +43,7 @@ class SupplierController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $this->validatedSupplier($request);
 
@@ -48,7 +52,7 @@ class SupplierController extends Controller
         return back();
     }
 
-    public function update(Request $request, Supplier $supplier)
+    public function update(Request $request, Supplier $supplier): RedirectResponse
     {
         $validated = $this->validatedSupplier($request, $supplier);
 
@@ -57,7 +61,7 @@ class SupplierController extends Controller
         return back();
     }
 
-    public function destroy(Supplier $supplier)
+    public function destroy(Supplier $supplier): RedirectResponse
     {
         $productsCount = $supplier->products()->count();
 
@@ -70,19 +74,23 @@ class SupplierController extends Controller
             ]);
         }
 
-        try {
-            $supplier->delete();
-        } catch (QueryException $e) {
-            // Database-level RESTRICT safety net: covers the race between
-            // the check above and the delete.
-            return back()->withErrors([
-                'supplier' => "Cannot delete \"{$supplier->name}\" because it is still referenced by other records.",
-            ]);
-        }
+        // Database-level RESTRICT safety net: covers the race between
+        // the check above and the delete.
+        return rescue(
+            function () use ($supplier) {
+                $supplier->delete();
 
-        return back();
+                return back();
+            },
+            function () use ($supplier) {
+                return back()->withErrors([
+                    'supplier' => "Cannot delete \"{$supplier->name}\" because it is still referenced by other records.",
+                ]);
+            }
+        );
     }
 
+    /** @return array<string, mixed> */
     private function validatedSupplier(Request $request, ?Supplier $supplier = null): array
     {
         return $request->validate([

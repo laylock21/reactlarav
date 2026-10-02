@@ -84,7 +84,7 @@ export function CategoriesTable({ categories, expandedId, onToggle, onEdit, onDe
                                     </TableRow>
                                     {isExpanded && (
                                         <TableRow
-                                            className="cursor-pointer border-dashed bg-muted/30 hover:bg-muted/50"
+                                            className="cursor-pointer border-dashed bg-muted/50 hover:bg-muted/70"
                                             onClick={(event) => {
                                                 event.stopPropagation();
                                                 onAddSubcategory(category);
@@ -97,9 +97,13 @@ export function CategoriesTable({ categories, expandedId, onToggle, onEdit, onDe
                                                     Add subcategory under {category.name}
                                                 </span>
                                             </TableCell>
-                                            <TableCell />
-                                            <TableCell />
-                                            <TableCell />
+                                            <TableCell>
+                                                <span className="text-sm text-muted-foreground">—</span>
+                                            </TableCell>
+                                            <TableCell className="max-w-md truncate text-muted-foreground">—</TableCell>
+                                            <TableCell>
+                                                <span className="block h-9 w-9" aria-hidden="true" />
+                                            </TableCell>
                                         </TableRow>
                                     )}
                                     {isExpanded &&

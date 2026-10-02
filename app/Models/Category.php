@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,28 +15,33 @@ class Category extends Model
         'parent_id',
     ];
 
+    /** @return BelongsTo<Category, $this> */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
+    /** @return HasMany<Category, $this> */
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
 
+    /** @return HasMany<Product, $this> */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class, 'category_id');
     }
 
-    public function scopeParentCategories($query)
+    /** @param Builder<Category> $query */
+    public function scopeParentCategories(Builder $query): void
     {
-        return $query->whereNull('parent_id');
+        $query->whereNull('parent_id');
     }
 
-    public function scopeSubCategories($query)
+    /** @param Builder<Category> $query */
+    public function scopeSubCategories(Builder $query): void
     {
-        return $query->whereNotNull('parent_id');
+        $query->whereNotNull('parent_id');
     }
 }

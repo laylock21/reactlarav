@@ -15,6 +15,7 @@ class Notification extends Model
         'action_url',
         'is_read',
         'read_at',
+        'created_at',
     ];
 
     protected $casts = [

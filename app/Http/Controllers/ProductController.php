@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Concerns\ResolvesPerPage;
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Inertia\Response;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\StockMovementService;
@@ -14,7 +19,8 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+    use ResolvesPerPage;
+    public function index(Request $request): Response
     {
         $products = Product::query()
             ->where('is_active', true) // Only show active products
@@ -24,7 +30,7 @@ class ProductController extends Controller
                     ->orWhere('sku', 'like', "%{$search}%");
                 });
             })
-            ->paginate(100)
+            ->paginate($this->perPage(100))
             ->withQueryString();
 
         return Inertia::render('products', [
@@ -35,7 +41,7 @@ class ProductController extends Controller
             ],
         ]);
     }
-    public function movements(Request $request, Product $product = null)
+    public function movements(Request $request, ?Product $product = null): Response
     {
         $query = StockMovement::with(['product', 'user'])
             ->latest();
@@ -58,7 +64,7 @@ class ProductController extends Controller
 
         return Inertia::render('stock-movement', [
             'movements' => $query
-                ->paginate(50)
+                ->paginate($this->perPage(50))
                 ->withQueryString(),
 
             'filters' => [
@@ -69,7 +75,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function revertMovements(Request $request)
+    public function revertMovements(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'ids' => 'required|array',
@@ -119,7 +125,7 @@ class ProductController extends Controller
         return back();
     }
     
-    public function exportPdf()
+    public function exportPdf(): \Symfony\Component\HttpFoundation\Response
     {
         $products = Product::all();
 
@@ -131,7 +137,7 @@ class ProductController extends Controller
         return $pdf->download('products.pdf');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'sku' => 'required|unique:products',
@@ -162,12 +168,12 @@ class ProductController extends Controller
         return redirect()->back();
     }
 
-    public function show(Product $product)
+    public function show(Product $product): JsonResponse
     {
         return response()->json($product);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Product $product): RedirectResponse
     {
         $validated = $request->validate([
             'sku' => 'required',
@@ -219,6 +225,10 @@ class ProductController extends Controller
 
             $file = fopen('php://output', 'w');
 
+            if ($file === false) {
+                throw new RuntimeException('Unable to open output stream.');
+            }
+
             fputcsv($file, [
                 'SKU',
                 'Barcode',
@@ -252,14 +262,14 @@ class ProductController extends Controller
         },200,$headers);
     }
 
-    public function destroy(Product $product)
+    public function destroy(Product $product): RedirectResponse
     {
         $product->delete();
 
         return redirect()->route('products.index');
     }
 
-   public function duplicate(Product $product)
+   public function duplicate(Product $product): RedirectResponse
     {
         // Store the original quantity before creating the copy
         $originalQuantity = (int) $product->quantity;
@@ -296,7 +306,7 @@ class ProductController extends Controller
         return redirect()->back();
     }
 
-    public function archived(Request $request)
+    public function archived(Request $request): Response
     {
         $products = Product::query()
             ->where('is_active', false) // Using is_active instead of archived
@@ -312,7 +322,7 @@ class ProductController extends Controller
                 }
             )
             ->latest()
-            ->paginate(10)
+            ->paginate($this->perPage(10))
             ->withQueryString();
 
         return inertia('archived', [
@@ -323,7 +333,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function restore(Product $product)
+    public function restore(Product $product): RedirectResponse
     {
         $product->update([
             'is_active' => true, // Using is_active instead of archived
@@ -332,7 +342,7 @@ class ProductController extends Controller
         return redirect()->back();
     }
 
-    public function status(Request $request, Product $product)
+    public function status(Request $request, Product $product): RedirectResponse
     {
         $request->validate([
             'status' => 'required|in:Pending,Delivered,In Transit',
@@ -344,7 +354,7 @@ class ProductController extends Controller
         return back();
     }
 
-    public function adjustStock(Request $request, Product $product)
+    public function adjustStock(Request $request, Product $product): RedirectResponse
     {
         $validated = $request->validate([
             'type' => 'required|in:increase,decrease',
@@ -399,7 +409,7 @@ class ProductController extends Controller
         return back();
     }
 
-    public function archive(Product $product)
+    public function archive(Product $product): RedirectResponse
     {
         $beforeData = $product->toArray();
 
@@ -422,7 +432,7 @@ class ProductController extends Controller
         return to_route('products.index');
     }
 
-    public function restoreBulk(Request $request)
+    public function restoreBulk(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'ids' => 'required|array',

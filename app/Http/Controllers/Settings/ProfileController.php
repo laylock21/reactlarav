@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -47,7 +48,7 @@ class ProfileController extends Controller
         $user->fill($validated);
 
         if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+            $user->forceFill(['email_verified_at' => null]);
         }
 
         $user->save();
@@ -64,9 +65,32 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        Auth::logout();
+        // Session rows restrict user deletes; the account is going away,
+        // so its sessions go first. Same for its own audit trail: logs
+        // reference the actor via RESTRICT, so purging them is part of
+        // account deletion (the observer already skips logging the
+        // deletion itself for the same reason).
+        DB::table('sessions')->where('user_id', $user->getKey())->delete();
+        DB::table('action_logs')->where('user_id', $user->getKey())->delete();
 
-        $user->delete();
+        // Orders or snapshots may still reference this user: rescue keeps
+        // the failure a friendly message instead of a 500.
+        $deleted = rescue(
+            function () use ($user) {
+                $user->delete();
+
+                return true;
+            },
+            fn () => false
+        );
+
+        if (! $deleted) {
+            return back()->withErrors([
+                'user' => 'This account cannot be deleted while records are still assigned to it.',
+            ]);
+        }
+
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

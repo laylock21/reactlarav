@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ActionLog extends Model
 {
@@ -15,6 +16,7 @@ class ActionLog extends Model
         'model_id',
         'description',
         'changes',
+        'created_at',
     ];
 
     protected $casts = [
@@ -23,7 +25,8 @@ class ActionLog extends Model
     ];
 
     // Relationships
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }

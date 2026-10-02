@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AnalyticsEvent extends Model
 {
@@ -15,6 +16,7 @@ class AnalyticsEvent extends Model
         'amount',
         'reference_type',
         'reference_id',
+        'created_at',
     ];
 
     protected $casts = [
@@ -23,7 +25,8 @@ class AnalyticsEvent extends Model
     ];
 
     // Relationships
-    public function product()
+    /** @return BelongsTo<Product, $this> */
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }

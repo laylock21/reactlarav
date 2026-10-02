@@ -8,6 +8,8 @@ export type UseAppearanceReturn = {
     readonly appearance: Appearance;
     readonly resolvedAppearance: ResolvedAppearance;
     readonly updateAppearance: (mode: Appearance) => void;
+    /** Adopt a mode locally (DB hydration) without persisting. */
+    readonly syncAppearance: (mode: Appearance) => void;
 };
 
 const listeners = new Set<() => void>();
@@ -115,5 +117,13 @@ export function useAppearance(): UseAppearanceReturn {
         notify();
     };
 
-    return { appearance, resolvedAppearance, updateAppearance } as const;
+    const syncAppearance = (mode: Appearance): void => {
+        currentAppearance = mode;
+        localStorage.setItem('appearance', mode);
+        setCookie('appearance', mode);
+        applyTheme(mode);
+        notify();
+    };
+
+    return { appearance, resolvedAppearance, updateAppearance, syncAppearance } as const;
 }

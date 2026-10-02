@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 /**
  * Persist appearance preferences to user_settings. Called automatically
@@ -14,6 +15,7 @@ export function persistAppearance(theme: string, fontSize: string): void {
             preserveScroll: true,
             preserveState: true,
             replace: true,
+            onError: () => toast.error('Unable to save appearance settings.'),
         },
     );
 }
